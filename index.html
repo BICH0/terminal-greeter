@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal-greeter</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div id="wrapper">
+    <div id="header">
+      <div id="lng-container" class="container" style="top:0;left:0;">
+        <img src="resources/svg/lang.svg" alt="lang">
+        <div class="subcontainer"></div>
+      </div>
+      <div id="thm-container" class="settings container" style="top:0;right:0;" onmouseenter="menu.settings(this)">
+        <img src="resources/svg/settings.svg" alt="lang">
+        <div class="subcontainer"></div>
+        <div class="colors"></div>
+      </div>
+    </div>
+    <div id="workspace">
+      <div id='terminal'>
+        <div class='header'></div>
+        <div id='term'>
+          <div id='stdout'></div>
+          <div id='prompt'><span id='username'></span>@<span id='session'></span>:~$<input type='text' id='stdin'></input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <div id="usr-container" class="container" style="bottom:0;left:0;">
+        <img src="resources/svg/users.svg" alt="lang">
+        <div class="subcontainer"></div></div>
+      <div id="ssn-container" class="container" style="positon:absolute; bottom:0;left:42%;">
+        <img src="resources/svg/session.svg" alt="lang">
+        <div class="subcontainer"></div>
+      </div>
+      <div id="battery" style="position: fixed; pointer-events: none;">Battery </div>
+      <div id="pwr-container" style="bottom:0;right:0;">
+        <img src="resources/svg/shutdown.svg" alt="lang">
+        <img src="resources/svg/restart.svg" alt="lang">
+        <img src="resources/svg/suspend.svg" alt="lang">
+        <img src="resources/svg/hibernate.svg" alt="lang">
+      </div>
+    </div>
+  </div>
+</body>
+<script src="js/fetch.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/main.js"></script>
+</html>
+
