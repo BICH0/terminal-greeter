@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+  <div id="cover" style="background:black;"></div>
   <div id="wrapper">
     <div id="header">
       <div id="lng-container" class="container" style="top:0;left:0;">
@@ -25,7 +26,7 @@
         <div class='header'></div>
         <div id='term'>
           <div id='stdout'></div>
-          <div id='prompt'><span id='username'></span>@<span id='session'></span>:~$<input type='text' id='stdin'></input>
+          <div id='prompt'><span id='username' class="text-accent"></span><span class="text-accent2">@</span><span id='session' class="text-accent"></span><span class="text-accent2">:~$</span><input type='text' id='stdin'></input>
           </div>
         </div>
       </div>
@@ -40,10 +41,10 @@
       </div>
       <div id="battery" style="position: fixed; pointer-events: none;">Battery </div>
       <div id="pwr-container" style="bottom:0;right:0;">
-        <img src="resources/svg/shutdown.svg" alt="lang">
-        <img src="resources/svg/restart.svg" alt="lang">
-        <img src="resources/svg/suspend.svg" alt="lang">
-        <img src="resources/svg/hibernate.svg" alt="lang">
+        <img src="resources/svg/shutdown.svg" class="power" alt="lang">
+        <img src="resources/svg/restart.svg" class="power" alt="lang">
+        <img src="resources/svg/suspend.svg" class="power" alt="lang">
+        <img src="resources/svg/hibernate.svg" class="power" alt="lang">
       </div>
     </div>
   </div>

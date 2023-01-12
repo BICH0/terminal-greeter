@@ -1,4 +1,5 @@
-var langs = {"es":{"save":"Guardar", "reset":"Reiniciar"},"en":{"save":"Save","reset":"Reset"}}
+var langs = {"es":{"save":"Guardar", "reset":"Reiniciar","unk_comm":"sh: Comando desconocido: ","inv_ssns":"Sesion invalida, usa sessions para listar todas las sesiones disponibles","inv_usrs":"Usuario invalido, usa users para listar todos los usuarios disponibles"},
+    "en":{"save":"Save","reset":"Reset","unk_comm":"sh: Unknown command: ","inv_ssns":"Invalid session, use sessions to list all available sessions","inv_usrs":"Invalid user, use users to list all available sessions"}}
 class fetcher{
     constructor(){
         this.in_authentication = false;
@@ -164,24 +165,6 @@ class fetcher{
     ldm(){
         usrs = lightdm.users.map(({username}) => username);
         ssns = lightdm.sessions.map(({key}) => key);
-        document.getElementById("pwr-container").childNodes.forEach(option => {
-            if (option.nodeType === Node.TEXT_NODE){
-                return;
-            }
-            console.log(option)
-            let route = option.src.split("/");
-            let opt_name = route[route.length -1].split(".")[0];
-            try{
-                if (! lightdm["can_" + opt_name]){
-                    throw "No function"
-                }
-                option.onclick = lightdm[opt_name];
-                console.log(option.onclick)
-            }
-            catch{
-                option.style.filter = "brightness(25%)";
-            }
-        });
         lightdm.cancel_autologin();
     
     }
@@ -200,27 +183,45 @@ class fetcher{
         })
         return status;
     }
+    async onerror(){
+        terminal.classList.toggle("wiggle");
+        await sleep(2000);
+        terminal.classList.toggle("wiggle");
+    }
     async password(mode){
         console.log(mode)
+        function toggleprompt(){
+            let promptitems = prompt.childNodes;
+            for (let x=0;x<=2;x++){
+                promptitems[x].classList.toggle("hidden");
+            }
+            if (stdin.type == "text"){
+                stdin.type = "password";
+                promptitems[3].innerText = "Password:";
+
+            }else{
+                stdin.type = "text";
+                promptitems[3].innerText = prompt_vals[1];
+            }
+        }
         if (mode == "pre"){
-            stdin.type = "password";
+            toggleprompt();
         }else{
             console.log("Trying to auth with password " + mode)
             stdin.disabled = true;
             await sleep(100);
             lightdm.respond(mode);
             await sleep(100);
+	   console.log("Result " + lightdm.is_authenticated)
             if (lightdm.is_authenticated){
-                lightdm.start_session(command.session);
-                console.log("session started")
+                theme.loadsession();
             }else{
-                command.return("Contraseña incorrecta")//Traducir
-                terminal.classList.toggle("wiggle");
+                command.return("Contraseña incorrecta")//TODO Traducir
+                toggleprompt();
+                fetch.onerror();
                 fetch.in_authentication = false;
                 stdin.disabled = false;
-                stdin.type = "text";
-                await sleep(2000);
-                terminal.classList.toggle("wiggle");
+                lightdm.cancel_authentication();
             }
         }
     }

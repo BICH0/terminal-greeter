@@ -8,6 +8,22 @@ class menuobj{
                 scontainer.innerHTML += "<p class='clickable child' data-function='" + item + "-" + element + "'>" + element.toUpperCase() + "</p>";
             })
         })
+        if (typeof lightdm !== "undefined"){
+            document.getElementById("pwr-container").childNodes.forEach(option => {
+                if (option.nodeType === Node.TEXT_NODE){
+                    return;
+                }
+                console.log(option)
+                let route = option.src.split("/");
+                let opt_name = route[route.length -1].split(".")[0];
+                if (lightdm["can_" + opt_name] === "undefined"){
+                    throw "No function"
+                }else{
+                    option.style.filter = "";
+                    option.onclick = lightdm[opt_name];
+                }
+            });
+        }
     }
     async select(item, index){
         try{

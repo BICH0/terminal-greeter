@@ -22,17 +22,22 @@ html,body,#wrapper{
   padding: 0;
   color: var(--text);
   font-family: hack;
+  font-size: 1em;
 }
-#wrapper{
-  position: relative;
+#cover,#wrapper{
+  position: absolute;
   height: 100vh;
   width: 100vw;
   margin: 0;
 }
+#cover{
+  z-index: 100;
+  transition: opacity .5s;
+}
 .container, #pwr-container{
   position: absolute;
   display: inline-flex;
-  z-index: 100;
+  z-index: 10;
   margin: 20px;
   padding: 0 10px;
   background-color: var(--container-bg);
@@ -114,6 +119,9 @@ html,body,#wrapper{
   height: 35px;
   margin: 5px 3px;
 }
+#ssn-container .child, #usr-container .child{
+  flex: inherit;
+}
 .child{
   flex: 1;
   text-align: center;
@@ -140,14 +148,27 @@ html,body,#wrapper{
   width: 100vw;
   height: calc(100% - 190px);
 }
+#stdout{
+  overflow-y: auto;
+  bottom: 28px;
+  position: absolute;
+}
 #stdin, #stdin:active, #stdin:focus{
   background: rgba(0,0,0,0);
   border: none;
   outline: none;
   color: var(--font-color);
   font-family: hack;
-  margin-left: 2px;
+  margin-left: 3px;
+  font-size: 1em;
+  padding: 0;
   width: 100%;
+}
+.power{
+  filter: brightness(25%);
+}
+.clickable,input:not([type="text"]){
+  cursor: pointer;
 }
 .wiggle{
   animation: wiggle 2s;
