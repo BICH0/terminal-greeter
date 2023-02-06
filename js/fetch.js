@@ -45,33 +45,25 @@ class fetcher{
         }
         return asc.replaceAll("¬","\u00a0").split("½");
     }
-    theme(theme=defaults["thms"]){
-        console.log("theme func")
+    async theme(theme=defaults["thms"]){
         let nodes = document.head.querySelectorAll("[href*='themes'],[src*='themes']");
-        console.log(document.head.querySelectorAll("[href*='themes'],[src*='themes']"))
         if (nodes.length != 0){
             nodes.forEach(node =>{
-                console.log(node.src)
-                let modifyied;
+                let modified;
                 let mode;
                 try{
-                    modifyied = node.src.split("/");
-                    console.log("try " + node)
+                    modified = node.src.split("/");
                     mode = "src";
                 }catch{
-                    modifyied = node.href.split("/");
-                    console.log("catch " + node)
+                    modified = node.href.split("/");
                     mode = "href";
                 }
-                modifyied[modifyied.length - 2] = theme;
-                modifyied = modifyied.join("/");
-                console.log(modifyied)
+                modified[modified.length - 2] = theme;
+                modified = modified.join("/");
                 if (mode == "src"){
-                    console.log("src changed")
-                    node.src = modifyied;
+                    node.src = modified;
                 }else{
-                    console.log("src changed")
-                    node.href = modifyied;
+                    node.href = modified;
                 }
             })
         }else{
@@ -85,7 +77,9 @@ class fetcher{
             stylesheet.onload = load;
             document.head.appendChild(script);
             document.head.appendChild(stylesheet);
-        }       
+        }   
+        await sleep(100);
+        this.colors();    
       };
     lang_selector(value){
         switch (value){
@@ -104,6 +98,7 @@ class fetcher{
         this.colors();
     }
     colors(update=false,store=false){
+        console.log("Going for colors");
         let colors = document.getElementsByClassName("colors")[0];
         if (update){
             colors = colors.childNodes
@@ -111,13 +106,11 @@ class fetcher{
                 let colorname = colors[x].id.slice(4,);
                 let colorvalue = colors[x].childNodes[1].value;
                 let coloropacity = parseInt(colors[x].childNodes[2].value).toString(16);
-                // console.log(colorname + " " + colorvalue + coloropacity)
                 document.documentElement.style.setProperty("--"+colorname, colorvalue + coloropacity);
                 this.colors_array["--" + colorname] = colorvalue + coloropacity;
             }
             if (store){
                 for (let color in this.colors_array){
-                    console.log("Saved " + color + " with value " + this.colors_array[color])
                     storage.setItem(defaults["thms"].slice(0,2)+color, this.colors_array[color])
                 }
             }
@@ -126,6 +119,7 @@ class fetcher{
             colors.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
             let stsheet;
             for (let x=0; x<document.styleSheets.length; x++){
+                console.log(document.styleSheets[x])
                 try{
                     stsheet = document.styleSheets[x].cssRules[0].cssText.slice(8,-3).split(";");
                     stsheet.forEach(rule => {
@@ -137,7 +131,6 @@ class fetcher{
                             name = name.replaceAll("--","");
                             document.documentElement.style.setProperty(name,value)
                         }else{
-                            console.log("catch")
                             name = name.replaceAll("--","");
                             value = rule[1];
                         }
@@ -147,8 +140,7 @@ class fetcher{
                                 opacity = parseInt(value.slice(-2,), 16);
                                 value = value.slice(0,-2);
                             }else{
-                                console.log(value)
-                                console.log("Value out of bounds")
+                                console.log("Value " + value + " out of bounds")
                             }
                         }
                         colors.innerHTML+=("<span id='clr_" + name + "'><label>"+ name + "</label><input type='color' value='" + value + "'><input type='range' min='0' max='255' step='1' oninput='this.nextElementSibling.value = this.value' value='" + opacity + "' style='width:40%;'><output style='width:calc(3rem + 3px); margin-right:5px;'>" + opacity + "</output>");//Pasar todo a hex
@@ -166,7 +158,6 @@ class fetcher{
         usrs = lightdm.users.map(({username}) => username);
         ssns = lightdm.sessions.map(({key}) => key);
         lightdm.cancel_autologin();
-    
     }
     check(list, param, target){
         if (target == null){
@@ -174,7 +165,6 @@ class fetcher{
         }
         let status = false;
         list.every(item =>{
-            console.log(item[param] + "=?" + target)
             if (item[param] == target){
                 status=true;
                 return false;
@@ -189,7 +179,6 @@ class fetcher{
         terminal.classList.toggle("wiggle");
     }
     async password(mode){
-        console.log(mode)
         function toggleprompt(){
             let promptitems = prompt.childNodes;
             for (let x=0;x<=2;x++){
@@ -198,25 +187,25 @@ class fetcher{
             if (stdin.type == "text"){
                 stdin.type = "password";
                 promptitems[3].innerText = "Password:";
+                promptitems[3].classList.remove("text-accent2");
 
             }else{
                 stdin.type = "text";
                 promptitems[3].innerText = prompt_vals[1];
+                promptitems[3].classList.add("text-accent2");
             }
         }
         if (mode == "pre"){
             toggleprompt();
         }else{
-            console.log("Trying to auth with password " + mode)
             stdin.disabled = true;
             await sleep(100);
             lightdm.respond(mode);
             await sleep(100);
-	   console.log("Result " + lightdm.is_authenticated)
             if (lightdm.is_authenticated){
                 theme.loadsession();
             }else{
-                command.return("Contraseña incorrecta")//TODO Traducir
+                command.return("Contraseña incorrecta",false)//TODO Traducir
                 toggleprompt();
                 fetch.onerror();
                 fetch.in_authentication = false;

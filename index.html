@@ -12,19 +12,19 @@
   <div id="wrapper">
     <div id="header">
       <div id="lng-container" class="container" style="top:0;left:0;">
-        <img src="resources/svg/lang.svg" alt="lang">
+        <img draggable="false"src="resources/svg/lang.svg" alt="lang">
         <div class="subcontainer"></div>
       </div>
       <div id="thm-container" class="settings container" style="top:0;right:0;" onmouseenter="menu.settings(this)">
-        <img src="resources/svg/settings.svg" alt="lang">
+        <img draggable="false"src="resources/svg/settings.svg" alt="lang">
         <div class="subcontainer"></div>
         <div class="colors"></div>
       </div>
     </div>
     <div id="workspace">
-      <div id='terminal'>
+      <div id='terminal' onclick="stdin.focus()">
         <div class='header'></div>
-        <div id='term'>
+        <div id='term' class="fake-terminal">
           <div id='stdout'></div>
           <div id='prompt'><span id='username' class="text-accent"></span><span class="text-accent2">@</span><span id='session' class="text-accent"></span><span class="text-accent2">:~$</span><input type='text' id='stdin'></input>
           </div>
@@ -33,18 +33,17 @@
     </div>
     <div id="footer">
       <div id="usr-container" class="container" style="bottom:0;left:0;">
-        <img src="resources/svg/users.svg" alt="lang">
+        <img draggable="false"src="resources/svg/users.svg" alt="lang">
         <div class="subcontainer"></div></div>
       <div id="ssn-container" class="container" style="positon:absolute; bottom:0;left:42%;">
-        <img src="resources/svg/session.svg" alt="lang">
+        <img draggable="false"src="resources/svg/session.svg" alt="lang">
         <div class="subcontainer"></div>
       </div>
-      <div id="battery" style="position: fixed; pointer-events: none;">Battery </div>
       <div id="pwr-container" style="bottom:0;right:0;">
-        <img src="resources/svg/shutdown.svg" class="power" alt="lang">
-        <img src="resources/svg/restart.svg" class="power" alt="lang">
-        <img src="resources/svg/suspend.svg" class="power" alt="lang">
-        <img src="resources/svg/hibernate.svg" class="power" alt="lang">
+        <img draggable="false"src="resources/svg/shutdown.svg" class="power" alt="lang">
+        <img draggable="false"src="resources/svg/restart.svg" class="power" alt="lang">
+        <img draggable="false"src="resources/svg/suspend.svg" class="power" alt="lang">
+        <img draggable="false"src="resources/svg/hibernate.svg" class="power" alt="lang">
       </div>
     </div>
   </div>

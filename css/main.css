@@ -5,7 +5,13 @@
   /* --border: ; */
   --accent: #ca0000;
   --text: #ffffff;
+  --text-accent: #ff0000;
+  --text-accent2: #00ff00;
   --text-shadow: #ff0000;
+  --charging: #ffff73;
+}
+*{
+  user-select: none;
 }
 @font-face {
   font-family: hack;
@@ -143,15 +149,32 @@ html,body,#wrapper{
   height: 90px;
   top: 0;
 }
+.text-accent{
+  color: var(--text-accent)
+}
+.text-accent2{
+  color: var(--text-accent2)
+}
+#term{
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.fake-terminal{
+  position: absolute;
+  bottom: 0;
+}
 #workspace{
   top: 0;
   width: 100vw;
   height: calc(100% - 190px);
 }
-#stdout{
-  overflow-y: auto;
-  bottom: 28px;
-  position: absolute;
+#prompt{
+  display: flex;
+  width: calc(100% - 20px);
+  margin: 16px 0;
+  height: 1rem;
+  position: relative;
+  top: 0;
 }
 #stdin, #stdin:active, #stdin:focus{
   background: rgba(0,0,0,0);
@@ -172,6 +195,10 @@ html,body,#wrapper{
 }
 .wiggle{
   animation: wiggle 2s;
+}
+.ac_on{
+  animation: ac 2s infinite;
+  transition: box-shadow 0.1s;
 }
 @keyframes wiggle{
   0%, 7% {
@@ -195,4 +222,21 @@ html,body,#wrapper{
   40%, 100% {
     transform: rotateZ(0);
   }
+}
+@keyframes ac{
+ 0%{
+  box-shadow: 0 0 0px var(--charging);
+ }
+ 20%{
+  box-shadow: 0 0 2px var(--charging);
+ }
+ 50%{
+  box-shadow: 0 0 4px var(--charging);
+ }
+ 70%{
+  box-shadow: 0 0 2px var(--charging);
+ }
+ 100%{
+  box-shadow: 0 0 1px var(--charging);
+ }
 }

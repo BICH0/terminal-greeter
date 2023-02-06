@@ -1,21 +1,27 @@
 var lngs = ["es", "en"];
 // var pwrs = ["PowerOff", "Sleep", "Hibernate", "Reboot"];
-var ssns = [];var usrs = [];var ascii = [];var thms = [];
-const prompt_vals = ["@",":~$"]
+const prompt_vals = ["@",":~$"];
+var thms = ["single","multiple"];
 //---------------------------------------
+var ssns = [];var usrs = [];var ascii = [];
 const prompt = document.getElementById("prompt");
 const stdout = document.getElementById("stdout");
 const stdin = document.getElementById("stdin");
 const cover = document.getElementById("cover");
+const term = document.getElementById("term");
+const terminal = document.getElementById("terminal");
+const pwrcontainer = document.getElementById("pwr-container");
 const storage = window.localStorage;
 var iprompt;
+let oneway = true;
 const history = [];
 var position = 0;
 var defaults = {"lngs":"","thms":"","ssns":"","usrs":""};
 var settings = {"ascii":"","menu":"visible"};
 var menu;
-const fetch = new fetcher();
-const command = new commands();
+let date = new Date;
+const fetch = new fetcher;
+const command = new commands;
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -29,9 +35,6 @@ function openstorage(){
       menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+stored_item+'"]'),window[item].indexOf(defaults[item]))
     }
     else{
-      // command.warn()//errores 
-      console.log(defaults)
-      console.log(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'))
       menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'),0)
     }
   }
@@ -45,19 +48,67 @@ function generate_prompt(std0=""){
   let nodes = prompt.childNodes;
   nodes[0].innerText = defaults["usrs"];
   nodes[2].innerText = defaults["ssns"];
-  console.log(nodes)
-  iprompt="<span class='text-accent'>" + defaults["usrs"] + "</span><span class='text-accent2'>" + prompt_vals[0] + "<span class='text-accent1'>" + defaults["ssns"] + "</span><span class='text-accent2' style='margin-right:3px;'>" + prompt_vals[1] + "</span>";
+  iprompt="<span class='text-accent'>" + defaults["usrs"] + "</span><span class='text-accent2'>" + prompt_vals[0] + "</span><span class='text-accent'>" + defaults["ssns"] + "</span><span class='text-accent2' style='margin-right:3px;'>" + prompt_vals[1] + "</span>";
   stdout.innerHTML += "<p>" + std0 + "</p>"
 }
 async function preload(){
-  if( typeof lightdm !== "undefined"){
-    fetch.ldm();
-  }else{
-    ssns = ["awesome", "bspwm","lxqt"];
-    usrs = ["bich0", "cnf"];
-    thms = ["single", "multiple"];
+  if( typeof lightdm === "undefined"){
+    class user_obj{
+      constructor (username){
+        this.username = username;
+      }
+    }
+    class session_obj{
+      constructor (key){
+        this.key = key;
+      }
+    }
+    class lightdm_obj{
+      constructor(){
+        this.in_authentication = false;
+        this.is_authenticated = false;
+        this.can_shutdown = false;
+        this.can_reboot = false;
+        this.can_suspend = false;
+        this.can_sleep = false;
+        this.can_access_brightness = false;
+        this.users = [
+          new user_obj("b1ch0"),
+          new user_obj("cnf")
+        ]
+        this.sessions = [
+          new session_obj("awesome"),
+          new session_obj("bspwm"),
+          new session_obj("lxqt")
+        ]
+      }
+      cancel_autologin (){
+
+      }
+      cancel_authentication (){
+        
+      }
+      authenticate (user){
+        this.in_authentication = true;
+      }
+      respond (password){
+        this.in_authentication = false;
+      }
+
+    }
+    lightdm = new lightdm_obj;
   }
-  menu = new menuobj();
+  fetch.ldm();
+  menu = new menuobj;
+  if (lightdm.can_access_brightness){
+    document.getElementById("pwr-container").addEventListener("wheel", e =>{
+        if (e.wheelDelta > 0 && lightdm.brightness <= 98){
+            lightdm.brightness_increase(2);
+        }else if(e.wheelDelta > 0 && lightdm.brightness >= 2){
+            lightdm.brightness_decrease(2);
+        }
+    });
+  }
   await openstorage();
   fetch.theme(defaults["thms"]);
   ascii = await fetch.ascii;
@@ -72,18 +123,13 @@ async function load(){
     theme.start();
   }
 }
-function height_check(lines) {
-  stdout.scrollTop = stdout.scrollHeight;
-  if (font_size.slice(0,-2) * 1 + stdout.offsetHeight - 10 >= win_height){
-    stdout.style.height = win_height - 5 + "px";
-  }
-};
+function stick_bottom(){
+  term.scrollTo(0, term.scrollHeight);
+}
 window.addEventListener("click", event => {
   if (event.target.classList.contains("clickable")){
-    console.log(event.target)
     let target = event.target;
-    let index = Array.prototype.indexOf.call(target.parentNode.childNodes, target);
-    menu.select(target, index);
+    menu.select(target);
     var [fn, val] = target.dataset.function.split("-");
     switch (fn){
       case "lng":
@@ -99,16 +145,17 @@ window.addEventListener("click", event => {
 
 window.addEventListener("keydown", async event => {
   const key = event.key;
+  console.log(key)
   if (key == "Enter"){
     history.push(stdin.value);
     position = history.length;
     if (fetch.in_authentication){
-      console.log("post");
       fetch.password(stdin.value);
     }else{
       command.handle(stdin.value)
     }
     stdin.value = "";
+    stick_bottom()
   }
   else if (key == "ArrowUp") {
     event.preventDefault();

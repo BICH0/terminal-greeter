@@ -11,23 +11,20 @@
     margin: 0 auto;
     border-radius: 0.3rem;
     box-shadow: 8px 8px var(--term-shadow);
+    overflow: hidden;
 }
 .header{
     border-radius: .3rem .3rem 0 0;
     width: 100%;
     background-color: var(--accent);
     height: 20px;
+    z-index: 2;
+    position: relative;
+    box-shadow: 0 4px 15px 10px var(--terminal-bg);
 }
 #term{
-    position: relative;
-    top: -6px;
-    height: calc(100% - 40px);
-    width: calc(100% - 20px);
-    padding: 10px;
-}
-#prompt{
-    position: absolute;
-    display: flex;
-    bottom: 10px;
-    width: calc(100% - 20px);
+    max-height: calc(100% - 19px);
+    width: calc(100% - 40px);
+    padding: 0 20px;
+    line-height: 1rem;
 }
