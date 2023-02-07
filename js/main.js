@@ -1,7 +1,8 @@
 var lngs = ["es", "en"];
 // var pwrs = ["PowerOff", "Sleep", "Hibernate", "Reboot"];
 const prompt_vals = ["@",":~$"];
-var thms = ["single","multiple"];
+var thms = [];
+var root_dir = "/usr/share/web-greeter/themes/terminal-greeter-ng";
 //---------------------------------------
 var ssns = [];var usrs = [];var ascii = [];
 const prompt = document.getElementById("prompt");
@@ -11,6 +12,7 @@ const cover = document.getElementById("cover");
 const term = document.getElementById("term");
 const terminal = document.getElementById("terminal");
 const pwrcontainer = document.getElementById("pwr-container");
+const bg_container = document.getElementById("backgrounds");
 const storage = window.localStorage;
 var iprompt;
 let oneway = true;
@@ -98,7 +100,7 @@ async function preload(){
     }
     lightdm = new lightdm_obj;
   }
-  fetch.ldm();
+  await fetch.ldm();
   menu = new menuobj;
   if (lightdm.can_access_brightness){
     document.getElementById("pwr-container").addEventListener("wheel", e =>{
@@ -110,12 +112,16 @@ async function preload(){
     });
   }
   await openstorage();
+  if (!thms.includes(defaults["thms"])){
+    console.warn("Theme " + defaults["thms"] + " not found, defaulting...");
+    menu.select(document.querySelector('[data-function="thm-'+thms[0]+'"]'));
+  }
   fetch.theme(defaults["thms"]);
   ascii = await fetch.ascii;
   lang_content = await fetch.lang_selector();
 }
 async function load(){
-  fetch.colors(false);
+  // fetch.colors(false);
   try{
     theme.start();
   }catch{
@@ -145,7 +151,7 @@ window.addEventListener("click", event => {
 
 window.addEventListener("keydown", async event => {
   const key = event.key;
-  console.log(key)
+  // console.log(key)
   if (key == "Enter"){
     history.push(stdin.value);
     position = history.length;

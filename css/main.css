@@ -143,6 +143,17 @@ html,body,#wrapper{
   display: none;
   text-decoration-color: rgba(0,0,0,0);
 }
+#backgrounds{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: .5rem;
+}
+.bg-open{
+  width: 25vw;
+  height: 25vh;
+  background: lime;
+}
 #footer, #header{
   display: inline-block;
   width: 100vw;

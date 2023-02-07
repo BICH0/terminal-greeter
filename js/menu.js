@@ -36,6 +36,7 @@ class menuobj{
             let info = item.dataset.function.split("-");
             storage.setItem(info[0]+"s",info[1])
             console.log("SetItem " + info[0] + " to " + info[1])
+            //console.log("Value " + storage.getItem("thms"))
             for (let x=0; x<parent.length; x++){
                 if (x==index){
                     if (item.classList.contains("hidden")){
@@ -61,11 +62,21 @@ class menuobj{
                 if (e.target != container && !document.getElementById("thm-container").contains(e.target)){//Container ?= document.getElementById
                     document.removeEventListener("click", configopen, true)
                     item.classList.remove("hover");
-                    fetch.colors("update");
+                    fetch.colors(true);
                 }
             }
             document.addEventListener("click", configopen, true);
         }   
+    }
+    background(item){
+        bg_container.classList.add("bg-open");
+        var bg_selector = function (e){
+            if (e.target != bg_container){
+                bg_container.classList.remove("bg-open");
+                document.removeEventListener("click", bg_selector, true)
+            }
+        }
+        document.addEventListener("click", bg_selector, true);
     }
     visibility(){
         let state = "hidden";

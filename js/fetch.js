@@ -102,7 +102,7 @@ class fetcher{
         let colors = document.getElementsByClassName("colors")[0];
         if (update){
             colors = colors.childNodes
-            for (let x=1;x<colors.length - 1;x++){
+            for (let x=1;x<colors.length - 2;x++){
                 let colorname = colors[x].id.slice(4,);
                 let colorvalue = colors[x].childNodes[1].value;
                 let coloropacity = parseInt(colors[x].childNodes[2].value).toString(16);
@@ -115,11 +115,12 @@ class fetcher{
                 }
             }
         }else{
+            console.log("Non update")
             let colors = document.getElementsByClassName("colors")[0];
             colors.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
             let stsheet;
             for (let x=0; x<document.styleSheets.length; x++){
-                console.log(document.styleSheets[x])
+                // console.log(document.styleSheets[x])
                 try{
                     stsheet = document.styleSheets[x].cssRules[0].cssText.slice(8,-3).split(";");
                     stsheet.forEach(rule => {
@@ -150,14 +151,27 @@ class fetcher{
                     console.log("Unable to get " + stsheet + " due to " + e)
                 }
             }
+            colors.innerHTML += "<input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'>";
             colors.innerHTML += "<div id='colors-btn'><input type='button' onclick='fetch.colors(true,true)' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.cleancolors()' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
             fetch.colors(true);
         }
     }
-    ldm(){
+    async ldm(){
         usrs = lightdm.users.map(({username}) => username);
         ssns = lightdm.sessions.map(({key}) => key);
         lightdm.cancel_autologin();
+        theme_utils.dirlist(root_dir+"/themes", false, themes=>{themes.forEach(theme=>{
+            theme_utils.dirlist(theme,false,files=>{
+                if (files.includes(theme+"/theme.js") && files.includes(theme+"/theme.css")){
+                    let tmp = theme.split("/");
+                    thms.push(tmp.pop());
+                }
+            })
+        })})
+        while (thms.length == 0){
+            await sleep(1);
+        }
+        console.log(window["thms"][0])
     }
     check(list, param, target){
         if (target == null){
