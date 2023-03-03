@@ -79,6 +79,12 @@ html,body,#wrapper{
   position: relative;
   flex-direction: column;
 }
+#thm-container.hover > .subcontainer:first-of-type{
+  border-right: 2px solid var(--text);
+  border-radius: 0;
+  margin-right: 10px;
+  height: 100%;
+}
 .colors{
   display: none;
 }
@@ -86,17 +92,17 @@ html,body,#wrapper{
   width: 100%;
   display: flex;
 }
-#colors-btn{
-  display: flex;
-}
 #colors-btn>input[type="button"]{
-  width: 30%;
+  width: 40%;
   padding: 10px 5px;
-  margin: 10px 10%;
+  margin: 10px 5%;
   background-color: var(--shadow);
   color: var(--text);
   border: 2px solid var(--shadow);
   border-radius: 10px;
+}
+#colors-btn > input:first-child{
+  width: calc(100% - 40px);
 }
 .colors > div > *{
   margin-top: 0;
@@ -145,14 +151,33 @@ html,body,#wrapper{
 }
 #backgrounds{
   position: absolute;
-  right: 10px;
-  top: 10px;
-  border-radius: .5rem;
+  top: 0px;
+  left: 0px;
+  padding: 20px;
+  z-index: 20;
 }
-.bg-open{
-  width: 25vw;
-  height: 25vh;
+#backgrounds > img{
+  height: 40px;
+  position:relative;
+  display: none;
+}
+#backgrounds.bg-open{
+  width: calc(100% - 40px);
+  height: calc(100% - 40px);
   background: lime;
+  border-radius: .5rem;
+  display: flex;
+}
+#backgrounds.bg-open > img{
+  display: block;
+  margin: 10px;
+  border-radius: .2rem;
+  border: 2px solid var(--text);
+  filter: brightness(.7);
+}
+.bg-selected{
+  filter:brightness(1);
+  box-shadow: 0px 0px 2px var(--accent);
 }
 #footer, #header{
   display: inline-block;

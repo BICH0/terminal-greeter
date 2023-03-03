@@ -71,7 +71,7 @@ class menuobj{
     background(item){
         bg_container.classList.add("bg-open");
         var bg_selector = function (e){
-            if (e.target != bg_container){
+            if (e.target != bg_container && !bg_container.contains(e.target)){
                 bg_container.classList.remove("bg-open");
                 document.removeEventListener("click", bg_selector, true)
             }

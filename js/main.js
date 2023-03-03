@@ -116,7 +116,7 @@ async function preload(){
     console.warn("Theme " + defaults["thms"] + " not found, defaulting...");
     menu.select(document.querySelector('[data-function="thm-'+thms[0]+'"]'));
   }
-  fetch.theme(defaults["thms"]);
+  fetch.theme();
   ascii = await fetch.ascii;
   lang_content = await fetch.lang_selector();
 }

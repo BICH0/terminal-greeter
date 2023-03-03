@@ -97,6 +97,33 @@ class fetcher{
         }
         this.colors();
     }
+    background(setup=false){
+        console.log("backgrounds")
+        if (setup){
+            theme_utils.dirlist(root_dir+"/resources/backgrounds",true,files=>{
+                files.forEach(file => {
+                    let filename = file.split("/").pop();
+                    bg_container.innerHTML += "<img src='" + file + "'onclick='fetch.bg_toggle(this)'data-name='" + filename + "'>";
+                })
+            })
+        }else{
+
+        }
+
+    }
+    bg_toggle(item){
+        document.getElementById("wrapper").background = "url('" + item.getAttribute("src") + "')";
+        item = item.src.split("/").pop();
+        let backgrounds = document.getElementById("backgrounds");
+        console.log(document.getElementById("wrapper").background)
+        let items = document.getElementsByClassName("bg-selected");
+        console.log(items)
+        if (items[0] != undefined){
+            items[0].classList.remove("bg-selected");
+        }
+        console.log(backgrounds.querySelectorAll("img[data-name='" + item + "']"))
+        backgrounds.querySelectorAll("img[data-name='" + item + "']")[0].classList.add("bg-selected");
+    }
     colors(update=false,store=false){
         console.log("Going for colors");
         let colors = document.getElementsByClassName("colors")[0];
@@ -151,12 +178,12 @@ class fetcher{
                     console.log("Unable to get " + stsheet + " due to " + e)
                 }
             }
-            colors.innerHTML += "<input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'>";
-            colors.innerHTML += "<div id='colors-btn'><input type='button' onclick='fetch.colors(true,true)' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.cleancolors()' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
+            colors.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'><input type='button' onclick='fetch.colors(true,true)' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.cleancolors()' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
             fetch.colors(true);
         }
     }
     async ldm(){
+        this.background(true);
         usrs = lightdm.users.map(({username}) => username);
         ssns = lightdm.sessions.map(({key}) => key);
         lightdm.cancel_autologin();
@@ -168,10 +195,10 @@ class fetcher{
                 }
             })
         })})
-        while (thms.length == 0){
+        while (thms.length != 0){
             await sleep(1);
         }
-        console.log(window["thms"][0])
+        await sleep(20);
     }
     check(list, param, target){
         if (target == null){

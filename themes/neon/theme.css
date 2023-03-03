@@ -1,0 +1,84 @@
+:root{
+    --terminal-bg: #1f1f1ff6;
+    --term-shadow: #0000009f;
+    --mipollaentuboca: #0f0f0f;
+    --neon: #FF0000;
+}
+#terminal{
+    position: relative;
+    background-color: var(--terminal-bg);
+    height: 80%;
+    width: 80%;
+    margin: 0 auto;
+    border-radius: 0.3rem;
+    border: 2px solid var(--neon);
+    animation: neon 4s infinite;
+    transition: box-shadow .7s, transform .3s, opacity .3;
+}
+.header{
+    height: 0;
+}
+#term{
+    position: relative;
+    top: -6;
+    height: calc(100% - 20px);
+    width: calc(100% - 20px);
+    padding: 10px;
+}
+#prompt{
+    position: absolute;
+    bottom: 10px;
+}
+#stdin{
+    background: none;
+    border: none;
+    color: var(--font-color);
+    font-family: hack;
+    margin-left: 2px;
+}
+@keyframes term-in{
+    0%{
+        opacity: 1;
+    }
+    20%{
+        opacity: 0;
+    }
+    30%{
+        opacity: 1;
+    }   
+    40%{
+        opacity: 0;
+    }
+    80%{
+        opacity: 0;
+    }
+}
+@keyframes neon {
+    0%{
+        box-shadow: 0px 0px 10px var(--neon);
+    }
+    15%{
+        box-shadow: 0px 0px 0px var(--neon);
+    }
+    20%{
+        box-shadow: 0px 0px 15px var(--neon);
+    }
+    25%{
+        box-shadow: 0px 0px 0px var(--neon);
+    }
+    30%{
+        box-shadow: 0px 0px 15px var(--neon);
+    }
+    50%{
+        box-shadow: 0px 0px 10px var(--neon);
+    }
+    70%{
+        box-shadow: 0px 0px 7px var(--neon);
+    }
+    80%{
+        box-shadow: 0px 0px 10px var(--neon);
+    }
+    90%{
+        box-shadow: 0px 0px 5px var(--neon);
+    }
+}
