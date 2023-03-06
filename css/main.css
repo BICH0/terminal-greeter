@@ -22,6 +22,24 @@
   font-weight: bold, bolder;
   src: url(../fonts/hack/Hack-Bold.ttf);
 }
+*::-webkit-scrollbar {
+  width: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: #0000005d;
+  border-radius: 1rem;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--shadow);
+  border-radius: 1rem;
+  transition: .2s background-color;
+}
+*::-webkit-scrollbar-thumb:active{
+  background-color: var(--accent);
+}
+#term::-webkit-scrollbar{
+  width: 0;
+}
 html,body,#wrapper{
   background-color: var(--background);
   margin: 0;
@@ -29,6 +47,7 @@ html,body,#wrapper{
   color: var(--text);
   font-family: hack;
   font-size: 1em;
+  transition: .5s background-image;
 }
 #cover,#wrapper{
   position: absolute;
@@ -100,6 +119,12 @@ html,body,#wrapper{
   color: var(--text);
   border: 2px solid var(--shadow);
   border-radius: 10px;
+  transition: transform .2s , background-color .2s;
+}
+#colors-btn>input[type="button"]:active{
+  background-color: var(--accent);
+  transform: scale(.95);
+
 }
 #colors-btn > input:first-child{
   width: calc(100% - 40px);
@@ -153,18 +178,23 @@ html,body,#wrapper{
   position: absolute;
   top: 0px;
   left: 0px;
-  padding: 20px;
+  margin: 40px 20px;
   z-index: 20;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow-y: auto;
 }
 #backgrounds > img{
-  height: 40px;
+  height: 80px;
   position:relative;
   display: none;
+  cursor: pointer;
 }
 #backgrounds.bg-open{
-  width: calc(100% - 40px);
-  height: calc(100% - 40px);
-  background: lime;
+  width: calc(100% - 90px);
+  margin-left: 50px;
+  height: calc(100% - 120px);
   border-radius: .5rem;
   display: flex;
 }
@@ -173,11 +203,19 @@ html,body,#wrapper{
   margin: 10px;
   border-radius: .2rem;
   border: 2px solid var(--text);
-  filter: brightness(.7);
+  filter: brightness(.5);
 }
-.bg-selected{
+.hidecolors > *{
+  opacity: 0;
+}
+.hidecolors > #colors-btn{
+  opacity: 1;
+}
+.hidecolors > #colors-btn > #image_selector{
+  opacity: 0;
+}
+#backgrounds.bg-open > img.bg-selected{
   filter:brightness(1);
-  box-shadow: 0px 0px 2px var(--accent);
 }
 #footer, #header{
   display: inline-block;

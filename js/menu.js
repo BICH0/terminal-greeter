@@ -14,7 +14,7 @@ class menuobj{
                 this.battery();
                 lightdm.battery_update.connect(() => this.battery());
             }
-            pwrcontainer.childNodes.forEach(option => {
+            pwr_container.childNodes.forEach(option => {
                 if (option.nodeType === Node.TEXT_NODE){
                     return;
                 }
@@ -35,8 +35,8 @@ class menuobj{
             let parent = item.parentNode.childNodes;
             let info = item.dataset.function.split("-");
             storage.setItem(info[0]+"s",info[1])
+            defaults[info[0]+"s"] = info[1];
             console.log("SetItem " + info[0] + " to " + info[1])
-            //console.log("Value " + storage.getItem("thms"))
             for (let x=0; x<parent.length; x++){
                 if (x==index){
                     if (item.classList.contains("hidden")){
@@ -49,7 +49,7 @@ class menuobj{
             await sleep(1);
             generate_prompt();
         }catch(e){
-            console.log("An error ocurred while selecting one or more options: " + e)
+            console.error("An error ocurred while selecting one or more options: " + e)
         }
             // cambiar el metodo de seleccion a brillo o fontweight
         // item.parentNode.style.maxWidth = item.offsetWidth + "px";
@@ -58,21 +58,35 @@ class menuobj{
         if (! item.classList.contains("hover")){
             item.classList.add("hover");
             var configopen = function (e){//Revisar si se puede con let
-                let container = document.getElementById("thm-container");
-                if (e.target != container && !document.getElementById("thm-container").contains(e.target)){//Container ?= document.getElementById
+                if (e.target != thm_container && !thm_container.contains(e.target)){//Container ?= document.getElementById
                     document.removeEventListener("click", configopen, true)
                     item.classList.remove("hover");
-                    fetch.colors(true);
+                    fetch.colors();
                 }
             }
             document.addEventListener("click", configopen, true);
         }   
     }
     background(item){
+        let childs = thm_container.childNodes;
+        function toggle_childs(opacity=""){
+            childs.forEach(node =>{
+                if (node.nodeType === Node.TEXT_NODE){
+                    return;
+                }
+                if (node.classList.contains("colors")){
+                    node.classList.toggle("hidecolors");
+                }else if (node.classList.contains("subcontainer")){
+                    node.style.opacity = opacity;
+                }
+            })
+        }
         bg_container.classList.add("bg-open");
+        toggle_childs(0)
         var bg_selector = function (e){
-            if (e.target != bg_container && !bg_container.contains(e.target)){
+            if (e.target != bg_container && !bg_container.contains(e.target) && !(e.target.tagName == "INPUT" && e.target.parentNode.id == "colors-btn")){
                 bg_container.classList.remove("bg-open");
+                toggle_childs();
                 document.removeEventListener("click", bg_selector, true)
             }
         }

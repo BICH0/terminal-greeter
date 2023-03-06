@@ -3,7 +3,6 @@ class commands{
         this.session;
     }
     async handle(value){
-        console.log("Handling " + value)
         this.return(value);
         let args =  value.split(" ");
         let cmd = args.shift();
@@ -119,6 +118,7 @@ class commands{
                 stdout.innerHTML = "";
                 break;
             case "date":
+                let date = new Date;
                 let fdate = date;
                 args = args.join(" ");
                 if (/^\+/.test(args)){

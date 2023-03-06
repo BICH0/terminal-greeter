@@ -45,9 +45,10 @@ class fetcher{
         }
         return asc.replaceAll("¬","\u00a0").split("½");
     }
-    async theme(theme=defaults["thms"]){
+    async theme(thm=defaults["thms"]){
         let nodes = document.head.querySelectorAll("[href*='themes'],[src*='themes']");
         if (nodes.length != 0){
+            theme.loadsession(false);
             nodes.forEach(node =>{
                 let modified;
                 let mode;
@@ -58,7 +59,7 @@ class fetcher{
                     modified = node.href.split("/");
                     mode = "href";
                 }
-                modified[modified.length - 2] = theme;
+                modified[modified.length - 2] = thm;
                 modified = modified.join("/");
                 if (mode == "src"){
                     node.src = modified;
@@ -68,18 +69,20 @@ class fetcher{
             })
         }else{
             let script = document.createElement("script");
-            script.src = "./themes/" + theme + "/theme.js";
+            script.src = "./themes/" + thm + "/theme.js";
             script.type = "text/javascript";
             let stylesheet = document.createElement("link");
             stylesheet.type = "text/css";
             stylesheet.rel = "stylesheet";
-            stylesheet.href = "./themes/" + theme + "/theme.css";
-            stylesheet.onload = load;
+            stylesheet.href = "./themes/" + thm + "/theme.css";
             document.head.appendChild(script);
             document.head.appendChild(stylesheet);
         }   
         await sleep(100);
-        this.colors();    
+        this.background("init");
+        this.colors("setup");  
+        await sleep(100); 
+        load();
       };
     lang_selector(value){
         switch (value){
@@ -90,104 +93,123 @@ class fetcher{
             break; 
         }
     }
-    cleancolors(){
-        console.log(this.cleancolors)
-        for (let color in this.colors_array){
-            storage.removeItem(defaults["thms"].slice(0,2)+color);
-        }
-        this.colors();
-    }
-    background(setup=false){
-        console.log("backgrounds")
-        if (setup){
-            theme_utils.dirlist(root_dir+"/resources/backgrounds",true,files=>{
-                files.forEach(file => {
-                    let filename = file.split("/").pop();
-                    bg_container.innerHTML += "<img src='" + file + "'onclick='fetch.bg_toggle(this)'data-name='" + filename + "'>";
-                })
-            })
-        }else{
-
-        }
-
-    }
-    bg_toggle(item){
-        document.getElementById("wrapper").background = "url('" + item.getAttribute("src") + "')";
-        item = item.src.split("/").pop();
-        let backgrounds = document.getElementById("backgrounds");
-        console.log(document.getElementById("wrapper").background)
-        let items = document.getElementsByClassName("bg-selected");
-        console.log(items)
-        if (items[0] != undefined){
-            items[0].classList.remove("bg-selected");
-        }
-        console.log(backgrounds.querySelectorAll("img[data-name='" + item + "']"))
-        backgrounds.querySelectorAll("img[data-name='" + item + "']")[0].classList.add("bg-selected");
-    }
-    colors(update=false,store=false){
-        console.log("Going for colors");
-        let colors = document.getElementsByClassName("colors")[0];
-        if (update){
-            colors = colors.childNodes
-            for (let x=1;x<colors.length - 2;x++){
-                let colorname = colors[x].id.slice(4,);
-                let colorvalue = colors[x].childNodes[1].value;
-                let coloropacity = parseInt(colors[x].childNodes[2].value).toString(16);
-                document.documentElement.style.setProperty("--"+colorname, colorvalue + coloropacity);
-                this.colors_array["--" + colorname] = colorvalue + coloropacity;
-            }
-            if (store){
-                for (let color in this.colors_array){
-                    storage.setItem(defaults["thms"].slice(0,2)+color, this.colors_array[color])
+    background(mode=null,item){
+        switch (mode){
+            case null:
+                wrapper.style.background = "url('" + item.getAttribute("src") + "') no-repeat center/cover";
+                item = item.src.split("/").pop();
+                let items = document.getElementsByClassName("bg-selected");
+                if (items[0] != undefined){
+                    items[0].classList.remove("bg-selected");
                 }
-            }
-        }else{
-            console.log("Non update")
-            let colors = document.getElementsByClassName("colors")[0];
-            colors.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
-            let stsheet;
-            for (let x=0; x<document.styleSheets.length; x++){
-                // console.log(document.styleSheets[x])
-                try{
-                    stsheet = document.styleSheets[x].cssRules[0].cssText.slice(8,-3).split(";");
-                    stsheet.forEach(rule => {
-                        rule = rule.replaceAll(" ","").split(":");
-                        let name = rule[0];
-                        let value;
-                        value = storage.getItem(defaults["thms"].slice(0,2)+name);
-                        if (value != null){
-                            name = name.replaceAll("--","");
-                            document.documentElement.style.setProperty(name,value)
-                        }else{
-                            name = name.replaceAll("--","");
-                            value = rule[1];
-                        }
-                        let opacity = 255;
-                        if (! /^#[0-9a-fA-F]{3,6}$/.test(value)){ //Comprobar la regexp
-                            if (/^#[0-9a-fA-F]{8}$/.test(value)){
-                                opacity = parseInt(value.slice(-2,), 16);
-                                value = value.slice(0,-2);
-                            }else{
-                                console.log("Value " + value + " out of bounds")
-                            }
-                        }
-                        colors.innerHTML+=("<span id='clr_" + name + "'><label>"+ name + "</label><input type='color' value='" + value + "'><input type='range' min='0' max='255' step='1' oninput='this.nextElementSibling.value = this.value' value='" + opacity + "' style='width:40%;'><output style='width:calc(3rem + 3px); margin-right:5px;'>" + opacity + "</output>");//Pasar todo a hex
+                bg_container.querySelectorAll("img[data-name='" + item + "']")[0].classList.add("bg-selected");
+                break;
+            case "setup":
+                theme_utils.dirlist(root_dir+"/resources/backgrounds",true,files=>{
+                    files.forEach(file => {
+                        let filename = file.split("/").pop();
+                        bg_container.innerHTML += "<img src='" + file + "'onclick='fetch.background(null,this)'data-name='" + filename + "'>";
                     })
+                })
+                break;
+            case "init":
+                let tback = storage.getItem(defaults["thms"].slice(0,2)+"-bg");
+                if ((!/var\(/.test(tback)) && item != "reset"){
+                    let tobj = document.querySelectorAll("img[data-name='" + tback + "']")[0];
+                    if ( tobj != null){
+                        this.background(null,tobj);
+                    }
+                }else{
+                    if (/^url\(/.test(wrapper.style.background)){
+                        wrapper.style.background = "var(--background)";
+                    }
                 }
-                catch(e){
-                    console.log("Unable to get " + stsheet + " due to " + e)
+                break;
+        }
+    }
+    async colors(action="update",update=false,store=false){
+        var colors = document.getElementsByClassName("colors")[0];
+        switch (action){
+            case "update":
+                colors = colors.childNodes;
+                for (let x=1;x<colors.length - 1;x++){
+                    let colorname = colors[x].id.slice(4,);
+                    let colorvalue = colors[x].childNodes[1].value;
+                    let coloropacity = parseInt(colors[x].childNodes[2].value).toString(16);
+                    document.documentElement.style.setProperty("--"+colorname, colorvalue + coloropacity);
+                    this.colors_array["--" + colorname] = colorvalue + coloropacity;
                 }
-            }
-            colors.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'><input type='button' onclick='fetch.colors(true,true)' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.cleancolors()' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
-            fetch.colors(true);
+            break;
+            case "store":
+                if (bg_container.classList.contains("bg-open")){
+                    let bg_value = bg_container.getElementsByClassName("bg-selected")[0].src.split("/").pop();
+                    if (! /^url\(/.test(wrapper.style.background)){
+                        bg_value = "var(--background)";
+                    }
+                    storage.setItem(defaults["thms"].slice(0,2)+"-bg", bg_value)
+                }else{
+                    await this.colors();
+                    for (let color in this.colors_array){
+                        storage.setItem(defaults["thms"].slice(0,2)+color, this.colors_array[color])
+                    }
+                }
+                break;
+            case "clean":
+                if (bg_container.classList.contains("bg-open")){
+                    this.background("init","reset");
+                }else{
+                    for (let color in this.colors_array){
+                        storage.removeItem(defaults["thms"].slice(0,2)+color);
+                    }
+                    this.colors();
+                }
+            default:
+                colors.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
+                let stsheet;
+                for (let x=0; x<document.styleSheets.length; x++){
+                    try{
+                        if (document.styleSheets[x].cssRules[0] == undefined){
+                            break;
+                        }
+                        stsheet = document.styleSheets[x].cssRules[0].cssText.slice(8,-3).split(";");
+                        stsheet.forEach(rule => {
+                            rule = rule.replaceAll(" ","").split(":");
+                            let name = rule[0];
+                            let value;
+                            value = storage.getItem(defaults["thms"].slice(0,2)+name);
+                            if (value != null){
+                                name = name.replaceAll("--","");
+                                document.documentElement.style.setProperty(name,value)
+                            }else{
+                                name = name.replaceAll("--","");
+                                value = rule[1];
+                            }
+                            let opacity = 255;
+                            if (! /^#[0-9a-fA-F]{3,6}$/.test(value)){ //Comprobar la regexp
+                                if (/^#[0-9a-fA-F]{8}$/.test(value)){
+                                    opacity = parseInt(value.slice(-2,), 16);
+                                    value = value.slice(0,-2);
+                                }else{
+                                    console.warn("Value " + value + " out of bounds")
+                                }
+                            }
+                            colors.innerHTML+=("<span id='clr_" + name + "'><label>"+ name + "</label><input type='color' value='" + value + "'><input type='range' min='0' max='255' step='1' oninput='this.nextElementSibling.value = this.value' value='" + opacity + "' style='width:40%;'><output style='width:calc(3rem + 3px); margin-right:5px;'>" + opacity + "</output>");//Pasar todo a hex
+                        })
+                    }
+                    catch(e){
+                        console.error("Unable to get " + stsheet + " due to " + e)
+                    }
+                }
+                colors.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'><input type='button' onclick='fetch.colors(\"store\")' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.colors(\"clean\")' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
+                fetch.colors();
+            break;
         }
     }
     async ldm(){
         this.background(true);
-        usrs = lightdm.users.map(({username}) => username);
-        ssns = lightdm.sessions.map(({key}) => key);
         lightdm.cancel_autologin();
         theme_utils.dirlist(root_dir+"/themes", false, themes=>{themes.forEach(theme=>{
+            console.log("Detected theme " + theme)
             theme_utils.dirlist(theme,false,files=>{
                 if (files.includes(theme+"/theme.js") && files.includes(theme+"/theme.css")){
                     let tmp = theme.split("/");

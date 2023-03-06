@@ -1,7 +1,7 @@
 :root{
     --terminal-bg: #1f1f1ff6;
     --term-shadow: #0000009f;
-    --mipollaentuboca: #0f0f0f;
+    --pene: #0f0f0f;
     --neon: #FF0000;
 }
 #terminal{
@@ -24,6 +24,7 @@
     height: calc(100% - 20px);
     width: calc(100% - 20px);
     padding: 10px;
+    line-height: 1rem;
 }
 #prompt{
     position: absolute;

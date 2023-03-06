@@ -4,13 +4,16 @@ class theme_obj{
         await sleep(300);
         cover.style.display = "none";
     }
-    async loadsession(){
+    async loadsession(login=true){
         cover.style.display = "block";
         cover.style.opacity = "1";
-        await sleep(300);
-        console.log(command.session)
-        lightdm.start_session(command.session);
-        console.log("Session started")
+        storage.setItem("multiwin","a");
+        if (login){
+            await sleep(300);
+            console.log(command.session)
+            lightdm.start_session(command.session);
+            console.log("Session started")
+        }
     }
 }
 var theme = new theme_obj();

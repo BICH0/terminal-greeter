@@ -1,18 +1,19 @@
 var lngs = ["es", "en"];
 // var pwrs = ["PowerOff", "Sleep", "Hibernate", "Reboot"];
 const prompt_vals = ["@",":~$"];
-var thms = [];
-var root_dir = "/usr/share/web-greeter/themes/terminal-greeter-ng";
+var root_dir = "/usr/share/web-greeter/themes/terminal-greeter";
 //---------------------------------------
-var ssns = [];var usrs = [];var ascii = [];
+var thms = [];var ssns = [];var usrs = [];var ascii = [];
 const prompt = document.getElementById("prompt");
 const stdout = document.getElementById("stdout");
 const stdin = document.getElementById("stdin");
 const cover = document.getElementById("cover");
 const term = document.getElementById("term");
 const terminal = document.getElementById("terminal");
-const pwrcontainer = document.getElementById("pwr-container");
+const pwr_container = document.getElementById("pwr-container");
 const bg_container = document.getElementById("backgrounds");
+const thm_container = document.getElementById("thm-container");
+const wrapper = document.getElementById("wrapper");
 const storage = window.localStorage;
 var iprompt;
 let oneway = true;
@@ -21,7 +22,6 @@ var position = 0;
 var defaults = {"lngs":"","thms":"","ssns":"","usrs":""};
 var settings = {"ascii":"","menu":"visible"};
 var menu;
-let date = new Date;
 const fetch = new fetcher;
 const command = new commands;
 function sleep(ms) {
@@ -32,12 +32,13 @@ function openstorage(){
   for (let item in defaults){
     let stored_item;
     stored_item = storage.getItem(item);
-    if ( stored_item != null){
-      defaults[item] = stored_item;
-      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+stored_item+'"]'),window[item].indexOf(defaults[item]))
+    if ( stored_item == null || stored_item == ""){
+      console.warn("Defaulting to " + '[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]')
+      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'),0)
     }
     else{
-      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'),0)
+      defaults[item] = stored_item;
+      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+stored_item+'"]'),window[item].indexOf(defaults[item]))
     }
   }
   for (let item in settings){
@@ -99,11 +100,16 @@ async function preload(){
 
     }
     lightdm = new lightdm_obj;
+    thms = ["single"];
+  }else{
+    console.log("Lightdm exists")
+    await fetch.ldm();
   }
-  await fetch.ldm();
+  usrs = lightdm.users.map(({username}) => username);
+  ssns = lightdm.sessions.map(({key}) => key);
   menu = new menuobj;
   if (lightdm.can_access_brightness){
-    document.getElementById("pwr-container").addEventListener("wheel", e =>{
+    document.getElementById("pwr_container").addEventListener("wheel", e =>{
         if (e.wheelDelta > 0 && lightdm.brightness <= 98){
             lightdm.brightness_increase(2);
         }else if(e.wheelDelta > 0 && lightdm.brightness >= 2){
@@ -116,7 +122,8 @@ async function preload(){
     console.warn("Theme " + defaults["thms"] + " not found, defaulting...");
     menu.select(document.querySelector('[data-function="thm-'+thms[0]+'"]'));
   }
-  fetch.theme();
+  await fetch.background("setup");
+  await fetch.theme();
   ascii = await fetch.ascii;
   lang_content = await fetch.lang_selector();
 }
@@ -128,6 +135,7 @@ async function load(){
     await sleep(1);
     theme.start();
   }
+  storage.setItem("multiwin",(new Date).getMilliseconds());
 }
 function stick_bottom(){
   term.scrollTo(0, term.scrollHeight);
@@ -143,8 +151,6 @@ window.addEventListener("click", event => {
         break;
       case "thm":
         fetch.theme(val);
-      default:
-        defaults[fn+"s"] = val;
     }
   }
 })
