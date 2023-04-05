@@ -1,12 +1,16 @@
-var langs = {"es":{"save":"Guardar", "reset":"Reiniciar","unk_comm":"sh: Comando desconocido: ","inv_ssns":"Sesion invalida, usa sessions para listar todas las sesiones disponibles","inv_usrs":"Usuario invalido, usa users para listar todos los usuarios disponibles"},
-    "en":{"save":"Save","reset":"Reset","unk_comm":"sh: Unknown command: ","inv_ssns":"Invalid session, use sessions to list all available sessions","inv_usrs":"Invalid user, use users to list all available sessions"}}
+var langs;var man;
+fetch("mandb.json").then(response => response.json()).then(json => JSON.stringify(json)).then(json => JSON.parse(json)).then(result => {
+    langs = result["lang"];
+    //man = result["man"];
+});
 class fetcher{
     constructor(){
         this.in_authentication = false;
         this.colors_array = [];
+        this.login_tries = 0;
     }
-    get ascii(){
-        switch (defaults["ascii"]) {
+    ascii(name){
+        switch (name) {
             case "arch":
             var asc = `¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬-\`½¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬.o+\`½¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`ooo/½¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`+oooo:½¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`+oooooo:½¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬-+oooooo+:½¬¬¬¬¬¬¬¬¬¬¬¬¬\`/:-:++oooo+:½¬¬¬¬¬¬¬¬¬¬¬¬\`/++++/+++++++:½¬¬¬¬¬¬¬¬¬¬¬\`/++++++++++++++:½¬¬¬¬¬¬¬¬¬¬\`/+++ooooooooooooo/\`½¬¬¬¬¬¬¬¬¬./ooosssso++osssssso+\`½¬¬¬¬¬¬¬¬.oossssso-\`\`\`\`/ossssss+\`½¬¬¬¬¬¬¬-osssssso.¬¬¬¬¬¬:ssssssso.½¬¬¬¬¬¬:osssssss/¬¬¬¬¬¬¬¬osssso+++.½¬¬¬¬¬/ossssssss/¬¬¬¬¬¬¬¬+ssssooo/-½¬¬¬\`/ossssso+/:-¬¬¬¬¬¬¬¬-:/+osssso+-½¬¬\`+sso+:-\`¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`.-/+oso:½¬\`++:.¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`-/+/½¬.\`¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬\`½¬`;
             //DEBIAN const ascii = ``.replaceAll("¬","\u00a0").split("½");
@@ -50,48 +54,30 @@ class fetcher{
         if (nodes.length != 0){
             theme.loadsession(false);
             nodes.forEach(node =>{
-                let modified;
-                let mode;
-                try{
-                    modified = node.src.split("/");
-                    mode = "src";
-                }catch{
-                    modified = node.href.split("/");
-                    mode = "href";
-                }
-                modified[modified.length - 2] = thm;
-                modified = modified.join("/");
-                if (mode == "src"){
-                    node.src = modified;
-                }else{
-                    node.href = modified;
-                }
+                node.remove();
             })
-        }else{
-            let script = document.createElement("script");
-            script.src = "./themes/" + thm + "/theme.js";
-            script.type = "text/javascript";
-            let stylesheet = document.createElement("link");
-            stylesheet.type = "text/css";
-            stylesheet.rel = "stylesheet";
-            stylesheet.href = "./themes/" + thm + "/theme.css";
-            document.head.appendChild(script);
-            document.head.appendChild(stylesheet);
-        }   
+        }
+        let script = document.createElement("script");
+        script.src = "./themes/" + thm + "/theme.js";
+        script.type = "text/javascript";
+        script.onload = () => console.log("Script loaded");
+        let stylesheet = document.createElement("link");
+        stylesheet.type = "text/css";
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = "./themes/" + thm + "/theme.css";
+        script.onload = () => console.log("Stylesheet loaded");
+        document.head.appendChild(script);
+        document.head.appendChild(stylesheet); 
+        await sleep(100);
+        theme = new classTheme;
         await sleep(100);
         this.background("init");
-        this.colors("setup");  
-        await sleep(100); 
+        this.colors("setup");
         load();
       };
-    lang_selector(value){
-        switch (value){
-            case "es":
-            case "en":
-                defaults["lngs"] = value;
-                fetch.colors();
-            break; 
-        }
+    lang_selector(value=defaults["lngs"]){
+            defaults["lngs"] = value;
+            this.colors("");
     }
     background(mode=null,item){
         switch (mode){
@@ -128,14 +114,14 @@ class fetcher{
         }
     }
     async colors(action="update",update=false,store=false){
-        var colors = document.getElementsByClassName("colors")[0];
+        var colorsContainer = document.getElementsByClassName("colors")[0];
         switch (action){
             case "update":
-                colors = colors.childNodes;
-                for (let x=1;x<colors.length - 1;x++){
-                    let colorname = colors[x].id.slice(4,);
-                    let colorvalue = colors[x].childNodes[1].value;
-                    let coloropacity = parseInt(colors[x].childNodes[2].value).toString(16);
+                colorsContainer = colorsContainer.childNodes;
+                for (let x=1;x<colorsContainer.length - 1;x++){
+                    let colorname = colorsContainer[x].id.slice(4,);
+                    let colorvalue = colorsContainer[x].childNodes[1].value;
+                    let coloropacity = parseInt(colorsContainer[x].childNodes[2].value).toString(16);
                     document.documentElement.style.setProperty("--"+colorname, colorvalue + coloropacity);
                     this.colors_array["--" + colorname] = colorvalue + coloropacity;
                 }
@@ -164,15 +150,19 @@ class fetcher{
                     this.colors();
                 }
             default:
-                colors.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
+                colorsContainer.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
                 let stsheet;
                 for (let x=0; x<document.styleSheets.length; x++){
                     try{
-                        if (document.styleSheets[x].cssRules[0] == undefined){
+                        let rules = document.styleSheets[x].cssRules[0];
+                        if ( rules.selectorText != ":root"){
                             break;
                         }
-                        stsheet = document.styleSheets[x].cssRules[0].cssText.slice(8,-3).split(";");
+                        stsheet = rules.cssText.slice(8,-3).split(";");
                         stsheet.forEach(rule => {
+                            if (rule == ""){
+                                return;
+                            }
                             rule = rule.replaceAll(" ","").split(":");
                             let name = rule[0];
                             let value;
@@ -193,14 +183,18 @@ class fetcher{
                                     console.warn("Value " + value + " out of bounds")
                                 }
                             }
-                            colors.innerHTML+=("<span id='clr_" + name + "'><label>"+ name + "</label><input type='color' value='" + value + "'><input type='range' min='0' max='255' step='1' oninput='this.nextElementSibling.value = this.value' value='" + opacity + "' style='width:40%;'><output style='width:calc(3rem + 3px); margin-right:5px;'>" + opacity + "</output>");//Pasar todo a hex
+                            colorsContainer.innerHTML+=("<span id='clr_" + name + "'><label>"+ name + "</label><input type='color' value='" + value + "'><input type='range' min='0' max='255' step='1' oninput='this.nextElementSibling.value = this.value' value='" + opacity + "' style='width:40%;'><output style='width:calc(3rem + 3px); margin-right:5px;'>" + opacity + "</output>");//Pasar todo a hex
                         })
                     }
                     catch(e){
                         console.error("Unable to get " + stsheet + " due to " + e)
                     }
                 }
-                colors.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='Browse'><input type='button' onclick='fetch.colors(\"store\")' value='" + langs[defaults["lngs"]]["save"] + "'><input type='button' onclick='fetch.colors(\"clean\")' value='" + langs[defaults["lngs"]]["reset"] + "'></div>";
+                colorsContainer.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='" + langs[defaults["lngs"]]["btn_browse"] + "'><input type='button' onclick='fetch.colors(\"store\")' value='" + langs[defaults["lngs"]]["btn_save"] + "'><input type='button' onclick='fetch.colors(\"clean\")' value='" + langs[defaults["lngs"]]["btn_reset"] + "'></div>";
+                let bval = langs[defaults["lngs"]]["timer"].split(":");//This is here to prevent calling from this.lang_selector() and reexecute this function
+                let botones = document.getElementById("notification-buttons").querySelectorAll("input");
+                botones[0].value = bval[2];
+                botones[1].value = bval[3];
                 fetch.colors();
             break;
         }
@@ -241,6 +235,14 @@ class fetcher{
         await sleep(2000);
         terminal.classList.toggle("wiggle");
     }
+    login(){
+        console.log(command.session_data);
+        console.log("Login attempt to " + command.session_data[1] + " by " + command.session_data[0]);
+        lightdm.cancel_authentication();
+        console.log("Starting login of: " + command.session_data[0] + " with status " + lightdm.in_authentication);
+        lightdm.authenticate(command.session_data[0]);
+        fetch.in_authentication = true;
+    }
     async password(mode){
         function toggleprompt(){
             let promptitems = prompt.childNodes;
@@ -262,18 +264,26 @@ class fetcher{
             toggleprompt();
         }else{
             stdin.disabled = true;
-            await sleep(100);
+            await sleep(100);//TODO comprobar
             lightdm.respond(mode);
             await sleep(100);
             if (lightdm.is_authenticated){
                 theme.loadsession();
             }else{
-                command.return("Contraseña incorrecta",false)//TODO Traducir
-                toggleprompt();
+                command.return(langs[defaults["lngs"]]["unk_pass"],false)
                 fetch.onerror();
-                fetch.in_authentication = false;
-                stdin.disabled = false;
-                lightdm.cancel_authentication();
+                if (this.login_tries >= 2){//To change the default login tries before reentering data change the number to desired tries - 1
+                    toggleprompt();
+                    fetch.in_authentication = false;
+                    lightdm.cancel_authentication();
+                    this.login_tries = 0;
+                    stdin.disabled = false;
+
+                }else{
+                    this.login_tries++;
+                    await this.login();
+                    stdin.disabled = false;
+                }
             }
         }
     }

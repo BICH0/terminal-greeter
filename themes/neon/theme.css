@@ -1,6 +1,4 @@
 :root{
-    --terminal-bg: #1f1f1ff6;
-    --term-shadow: #0000009f;
     --pene: #0f0f0f;
     --neon: #FF0000;
 }
@@ -13,23 +11,25 @@
     border-radius: 0.3rem;
     border: 2px solid var(--neon);
     animation: neon 4s infinite;
-    transition: box-shadow .7s, transform .3s, opacity .3;
+    transition: box-shadow .7s, transform .3s, opacity .3s;
+    animation: terminal .5s .3s forwards, neon infinite 2.5s;
+}
+.out{
+    animation: terminal .5s backwards forwards;
 }
 .header{
     height: 0;
 }
 #term{
-    position: relative;
-    top: -6;
-    height: calc(100% - 20px);
-    width: calc(100% - 20px);
-    padding: 10px;
+    max-height: calc(100% - 26px);
+    width: calc(100% - 40px);
+    padding: 0 20px;
     line-height: 1rem;
 }
-#prompt{
+/* #prompt{
     position: absolute;
     bottom: 10px;
-}
+} */
 #stdin{
     background: none;
     border: none;
@@ -37,21 +37,12 @@
     font-family: hack;
     margin-left: 2px;
 }
-@keyframes term-in{
+@keyframes terminal{
     0%{
-        opacity: 1;
+        transform: scaleY(.1);
     }
-    20%{
-        opacity: 0;
-    }
-    30%{
-        opacity: 1;
-    }   
-    40%{
-        opacity: 0;
-    }
-    80%{
-        opacity: 0;
+    100%{
+        transform: scaleY(1);
     }
 }
 @keyframes neon {

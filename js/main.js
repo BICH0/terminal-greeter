@@ -2,6 +2,7 @@ var lngs = ["es", "en"];
 // var pwrs = ["PowerOff", "Sleep", "Hibernate", "Reboot"];
 const prompt_vals = ["@",":~$"];
 var root_dir = "/usr/share/web-greeter/themes/terminal-greeter";
+var default_timer=5;//Time in seconds to wait during shutdown/suspend...
 //---------------------------------------
 var thms = [];var ssns = [];var usrs = [];var ascii = [];
 const prompt = document.getElementById("prompt");
@@ -14,8 +15,10 @@ const pwr_container = document.getElementById("pwr-container");
 const bg_container = document.getElementById("backgrounds");
 const thm_container = document.getElementById("thm-container");
 const wrapper = document.getElementById("wrapper");
+const workspace = document.getElementById("workspace");
+const notification = document.getElementById("notification");
 const storage = window.localStorage;
-var iprompt;
+var iprompt;var theme;
 let oneway = true;
 const history = [];
 var position = 0;
@@ -52,7 +55,7 @@ function generate_prompt(std0=""){
   nodes[0].innerText = defaults["usrs"];
   nodes[2].innerText = defaults["ssns"];
   iprompt="<span class='text-accent'>" + defaults["usrs"] + "</span><span class='text-accent2'>" + prompt_vals[0] + "</span><span class='text-accent'>" + defaults["ssns"] + "</span><span class='text-accent2' style='margin-right:3px;'>" + prompt_vals[1] + "</span>";
-  stdout.innerHTML += "<p>" + std0 + "</p>"
+  // stdout.innerHTML += "<p>" + std0 + "</p>";
 }
 async function preload(){
   if( typeof lightdm === "undefined"){
@@ -100,7 +103,7 @@ async function preload(){
 
     }
     lightdm = new lightdm_obj;
-    thms = ["single"];
+    thms = ["single","neon","multiple"];
   }else{
     console.log("Lightdm exists")
     await fetch.ldm();
@@ -122,10 +125,15 @@ async function preload(){
     console.warn("Theme " + defaults["thms"] + " not found, defaulting...");
     menu.select(document.querySelector('[data-function="thm-'+thms[0]+'"]'));
   }
-  await fetch.background("setup");
+  try{
+    await fetch.background("setup");
+  }
+  catch{
+    console.log("Backgrounds are disabled in Browser Mode");
+  }
   await fetch.theme();
   ascii = await fetch.ascii;
-  lang_content = await fetch.lang_selector();
+  // lang_content = await fetch.lang_selector();
 }
 async function load(){
   // fetch.colors(false);
@@ -143,8 +151,11 @@ function stick_bottom(){
 window.addEventListener("click", event => {
   if (event.target.classList.contains("clickable")){
     let target = event.target;
-    menu.select(target);
     var [fn, val] = target.dataset.function.split("-");
+    if (fn == "pwr"){
+      menu.power(val);
+    }else{
+      menu.select(target);
     switch (fn){
       case "lng":
         fetch.lang_selector(val)
@@ -152,13 +163,16 @@ window.addEventListener("click", event => {
       case "thm":
         fetch.theme(val);
     }
+    }
+    
   }
 })
 
 window.addEventListener("keydown", async event => {
   const key = event.key;
-  // console.log(key)
-  if (key == "Enter"){
+  if (!stdin.disabled){
+    if (key == "Enter"){
+
     history.push(stdin.value);
     position = history.length;
     if (fetch.in_authentication){
@@ -168,24 +182,25 @@ window.addEventListener("keydown", async event => {
     }
     stdin.value = "";
     stick_bottom()
-  }
-  else if (key == "ArrowUp") {
-    event.preventDefault();
-    if (position - 1 >= 0){
-      position = position - 1;
-      stdin.value=history[position];
+    }
+    else if (key == "ArrowUp") {
+      event.preventDefault();
+      if (position - 1 >= 0){
+        position = position - 1;
+        stdin.value=history[position];
+      };
+    }
+    else if (key == "ArrowDown") {
+      if (position + 1 < history.length){
+        position = position + 1
+        stdin.value=history[position];
+      }
+      else if (position + 1 == history.length){
+        position = position + 1;
+        stdin.value="";
+      }
     };
-  }
-  else if (key == "ArrowDown") {
-    if (position + 1 < history.length){
-      position = position + 1
-      stdin.value=history[position];
-    }
-    else if (position + 1 == history.length){
-      position = position + 1;
-      stdin.value="";
-    }
-  };
+   }
 })
 
 window.onload = preload();

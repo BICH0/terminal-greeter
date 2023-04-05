@@ -9,6 +9,16 @@
 </head>
 <body>
   <div id="cover" style="background:black;"></div>
+  <div id="notification-wrapper" onclick="menu.notification_response(event);">
+    <div id="notification">
+      <p id="notification-title"></p>
+      <p id="notification-timer"></p>
+      <div id="notification-buttons">
+        <input type="button" onclick="menu.notification_response(event,0);">
+        <input type="button" onclick="menu.notification_response(event);">
+      </div>
+    </div>
+  </div>
   <div id="wrapper">
     <div id="header">
       <div id="lng-container" class="container" style="top:0;left:0;">
@@ -36,15 +46,15 @@
       <div id="usr-container" class="container" style="bottom:0;left:0;">
         <img draggable="false"src="resources/svg/users.svg" alt="lang">
         <div class="subcontainer"></div></div>
-      <div id="ssn-container" class="container" style="positon:absolute; bottom:0;left:42%;">
+      <div id="ssn-container" class="container" style="positon:absolute; bottom:0;left:45%;">
         <img draggable="false"src="resources/svg/session.svg" alt="lang">
         <div class="subcontainer"></div>
       </div>
       <div id="pwr-container" style="bottom:0;right:0;">
-        <img draggable="false"src="resources/svg/shutdown.svg" class="power" alt="lang">
-        <img draggable="false"src="resources/svg/restart.svg" class="power" alt="lang">
-        <img draggable="false"src="resources/svg/suspend.svg" class="power" alt="lang">
-        <img draggable="false"src="resources/svg/hibernate.svg" class="power" alt="lang">
+        <img draggable="false"src="resources/svg/shutdown.svg" class="power clickable" alt="lang">
+        <img draggable="false"src="resources/svg/restart.svg" class="power clickable" alt="lang">
+        <img draggable="false"src="resources/svg/suspend.svg" class="power clickable" alt="lang">
+        <img draggable="false"src="resources/svg/hibernate.svg" class="power clickable" alt="lang">
       </div>
     </div>
   </div>

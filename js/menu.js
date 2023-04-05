@@ -2,6 +2,7 @@ class menuobj{
     constructor(){
         this.hidden = false;
         this.bat_prc = false;
+        this.timer = 0;
         Array.from(document.getElementsByClassName("container")).forEach(container => {
             let item = container.id.split("-")[0];
             let scontainer=container.childNodes[3];
@@ -23,10 +24,11 @@ class menuobj{
                 if (lightdm["can_" + opt_name] === undefined || lightdm["can_" + opt_name] == false){
                     console.log("Lightdm cannot " + opt_name)
                 }else{
-                    option.style = "filter:brightness(100%) !important;";
-                    option.onclick = lightdm[opt_name];
+                    option.style = "filter:brightness(100%) !important;cursor:pointer;";
+                    option.setAttribute("data-function","pwr-"+opt_name);
                 }
             });
+
         }
     }
     async select(item){
@@ -49,7 +51,7 @@ class menuobj{
             await sleep(1);
             generate_prompt();
         }catch(e){
-            console.error("An error ocurred while selecting one or more options: " + e)
+            console.error("An error ocurred while selecting one or more options: (" + item.dataset.function + ") " + e)
         }
             // cambiar el metodo de seleccion a brillo o fontweight
         // item.parentNode.style.maxWidth = item.offsetWidth + "px";
@@ -101,6 +103,30 @@ class menuobj{
             container.style.visibility = state;
         })
         this.hidden = !this.hidden;
+    }
+    async power(opt){
+        notification.parentNode.classList.toggle("notification-on");
+        let action = langs[defaults["lngs"]][opt].split(":");
+        let units = langs[defaults["lngs"]]["timer"].split(":");
+        let title = notification.querySelector("#notification-title");
+        let timer = notification.querySelector("#notification-timer");
+        title.innerText = action[1];
+        menu.timer = default_timer*10 + 9;
+        while (menu.timer>=0){
+            timer.innerText = action[0] + units[0] + Math.trunc(menu.timer/10)+ units[1];
+            await sleep(100);
+            menu.timer--;
+        }
+        notification.parentNode.classList.toggle("notification-on");
+        console.log("Timer was set to " + menu.timer)
+        if (menu.timer >= -5){
+            console.log("Handling " + opt);
+            lightdm[opt]();
+        }
+    }
+    notification_response(e,num=-5){
+        e.stopPropagation();
+        this.timer=num;
     }
     battery(){
         let bat0 = lightdm.battery_data;

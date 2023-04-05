@@ -1,6 +1,6 @@
 class commands{
     constructor(session){
-        this.session;
+        this.session_data = [];
     }
     async handle(value){
         this.return(value);
@@ -22,31 +22,27 @@ class commands{
             case "login":
                 if (args[0] != null){
                     if (fetch.check(lightdm.users,"username",args[0])){
-                        args[0] = defaults["usrs"];
+                        this.session_data[0] = defaults["usrs"];
                     }else{
-                        this.return("Error: " + langs[defaults["lngs"]]["inv_usrs"],false);
+                        this.return("Error: " + langs[defaults["lngs"]]["inv_usr"],false);
                         fetch.onerror();
                         break
                     }
                 }else{
-                    args[0] = defaults["usrs"];
+                    this.session_data[0] = defaults["usrs"];
                 }
                 if (args[1] != null){
                     if (fetch.check(lightdm.sessions,"key",args[1])){
-                        this.session = args[1];
+                        this.session_data = args[1];
                     }else{
-                        this.return("Error: " + langs[defaults["lngs"]]["inv_ssns"],false);
+                        this.return("Error: " + langs[defaults["lngs"]]["inv_ssn"],false);
                         fetch.onerror();
                         break
                     }
                 }else{
-                    this.session = defaults["ssns"];
+                    this.session_data[1] = defaults["ssns"];
                 }
-                console.log("Login attempt to " + args[1] + " by " + args[0])
-                lightdm.cancel_authentication();
-                console.log("Starting login of: " + args[0] + " with status " + lightdm.in_authentication)
-                lightdm.authenticate(args[0]);
-                fetch.in_authentication = true;
+                fetch.login();
                 fetch.password("pre");
                 break;
             case "reset_colors":
@@ -84,29 +80,30 @@ class commands{
             case "su":
             case "user":
                 if(args[0] == defaults["usrs"]){
-                    this.return("lightdm: error: " + args[0] + " is the current user",false)//TODO traducir
+                    this.return("lightdm: error: " + args[0] + langs[defaults["lngs"]]["curr_usr"],false)
                 }else if (fetch.check(lightdm.users,"username",args[0])){
                     menu.select(document.querySelector("[data-function='usr-"+ args[0] +"']"))
                 }else{
-                    this.return("lightdm:",false)//TODO traducir
+                    this.return("lightdm:" + langs[defaults["lngs"]]["inv_usr"],false)
                 }
                 break;
             case "session":
                 if(args[0] == defaults["ssns"]){
-                    this.return("lightdm: error: " + args[0] + " is the current session",false)//TODO traducir
+                    this.return("lightdm: error: " + args[0] + langs[defaults["lngs"]]["curr_ssn"],false)
                 }
                 else if(fetch.check(lightdm.sessions,"key",args[0])){
                     menu.select(document.querySelector("[data-function='ssn-"+ args[0] +"']"))
                 }else{
-                    this.return("lightdm:",false)//TODO traducir
+                    this.return("lightdm:" + langs[defaults["lngs"]]["inv_ssn"],false)
                 }
                 break;
             case "sessions":
-                loopthru(lightdm.sessions,"key")
+                this.return(langs[defaults["lngs"]]["avl_ssn"]);
+                loopthru(lightdm.sessions,"key");
                 break;
             case "users":
-                this.return()//TODO texto: Avaliable
-                loopthru(lightdm.users,"username")
+                this.return(langs[defaults["lngs"]]["avl_usr"]);
+                loopthru(lightdm.users,"username");
                 break;
             case "whoami":
                 this.return(defaults["usrs"],false);
@@ -165,7 +162,7 @@ class commands{
                         console.log(args[x])
                     }
                 }else if (args != ""){
-                    this.return("date: ",false)//Traducir
+                    this.return("date: " + langs[defaults["lngs"]]["inv_arg"],false)
                     return;
                 }else{
                     fdate = fdate.toString().split("(")[0];
@@ -183,24 +180,25 @@ class commands{
             case "cd":
             case "cp":
             case "ls":
-                this.return(cmd + ": error: Permission denied.",false)//TODO Traducir
+            case "man"://TODO create man
+                this.return(cmd + ": error: " + langs[defaults["lngs"]]["inv_perm"],false)
                 break;
             case "find":
             case "grep":
             case "ip":
-                this.return(cmd + ": error: Command disabled by System Administrator.",false)//TODO Traducir
+                this.return(cmd + ": error: " + langs[defaults["lngs"]]["cmd_dis"],false)
                 break;
             case "":
                 break;
             default:
-                this.return(langs[defaults["lngs"]]["unk_cmm"],false)
+                this.return("bash: " + langs[defaults["lngs"]]["unk_cmd"] + cmd ,false)
         }
     }
     return(value,prompt=true){
         if (prompt){
-            stdout.innerHTML += "<p>" + iprompt + value + "<p/>";
+            stdout.innerHTML += "<p>" + iprompt + value + "</p>";
         }else{
-            stdout.innerHTML += "<p>" + value + "<p/>";
+            stdout.innerHTML += "<p>" + value + "</p>";
         }
     }
 }

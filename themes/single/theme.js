@@ -1,4 +1,7 @@
-class theme_obj{
+var classTheme = class{
+    constructor(){
+        this.id="single";
+    }
     async start(){
         cover.style.opacity = 0;
         await sleep(300);
@@ -16,4 +19,3 @@ class theme_obj{
         }
     }
 }
-var theme = new theme_obj();
