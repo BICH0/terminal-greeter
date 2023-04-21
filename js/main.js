@@ -40,6 +40,7 @@ function openstorage(){
       menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'),0)
     }
     else{
+      console.log("Stored setting " + defaults[item] + ": " + stored_item);
       defaults[item] = stored_item;
       menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+stored_item+'"]'),window[item].indexOf(defaults[item]))
     }
@@ -136,7 +137,6 @@ async function preload(){
   // lang_content = await fetch.lang_selector();
 }
 async function load(){
-  // fetch.colors(false);
   try{
     theme.start();
   }catch{

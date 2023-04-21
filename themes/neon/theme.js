@@ -10,8 +10,7 @@ var classTheme = class{
     async loadsession(login=true){
         if (login){
             await sleep(300);
-            console.log(command.session)
-            lightdm.start_session(command.session);
+            lightdm.start_session(command.session_data[1]);
             console.log("Session started")
         }else{
             cover.style.display = "block";

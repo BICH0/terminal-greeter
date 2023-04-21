@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal-greeter</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    #cover{
+      transition: opacity .5s;
+    }
+    .fade{
+      transition: opacity .2s .5s;
+        opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="cover" style="background:black;"></div>
+</body>
+<script>
+  const cover = document.getElementById("cover").classList;
+  window.addEventListener("storage", e => {
+      console.log("Event fired")
+      if (e.key == "multiwin"){
+        cover.toggle("fade");
+      }else{
+        
+      }
+  })
+</script>
+</html>
+

@@ -13,8 +13,7 @@ var classTheme = class{
         storage.setItem("multiwin","a");
         if (login){
             await sleep(300);
-            console.log(command.session)
-            lightdm.start_session(command.session);
+            lightdm.start_session(command.session_data[1]);
             console.log("Session started")
         }
     }

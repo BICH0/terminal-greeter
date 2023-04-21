@@ -70,13 +70,19 @@ class commands{
             case "halt":
             case "shutdown":
             case "poweroff":
-                let time=0;
-                if (/^\+.*/.test(args[0])){
-                    time = args[0].slice(1,);
-                }
-                await sleep(time);
-                lightdm.shutdown();
+                menu.power("shutdown");
                 break;
+            case "restart":
+            case "reboot":
+                menu.power("restart");
+                break;
+            case "sleep":
+            case "suspend":
+                menu.power("suspend");
+                break;
+            case "hibernate":
+                menu.power("hibernate");
+                break
             case "su":
             case "user":
                 if(args[0] == defaults["usrs"]){

@@ -1,0 +1,10 @@
+class <name>{
+  constructor(){
+    this.name="<name>";
+  }
+  start(){
+
+  }
+};
+theme.<name> = new <name>();
+screen_plugins.push(<name>);

@@ -36,9 +36,9 @@ class menuobj{
             let index = Array.prototype.indexOf.call(item.parentNode.childNodes, item);
             let parent = item.parentNode.childNodes;
             let info = item.dataset.function.split("-");
+            console.log("SetItem " + info[0] + " to " + info[1])
             storage.setItem(info[0]+"s",info[1])
             defaults[info[0]+"s"] = info[1];
-            console.log("SetItem " + info[0] + " to " + info[1])
             for (let x=0; x<parent.length; x++){
                 if (x==index){
                     if (item.classList.contains("hidden")){
@@ -105,6 +105,10 @@ class menuobj{
         this.hidden = !this.hidden;
     }
     async power(opt){
+        if (lightdm["can_"+opt] === false || lightdm["can_"+opt] === undefined){
+            command.return("sh: error: "+langs[defaults["lngs"]]["cannot_power"]+ opt,false);
+            return;
+        }
         notification.parentNode.classList.toggle("notification-on");
         let action = langs[defaults["lngs"]][opt].split(":");
         let units = langs[defaults["lngs"]]["timer"].split(":");

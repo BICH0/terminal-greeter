@@ -127,6 +127,7 @@ class fetcher{
                 }
             break;
             case "store":
+                console.log("Saving theme values")
                 if (bg_container.classList.contains("bg-open")){
                     let bg_value = bg_container.getElementsByClassName("bg-selected")[0].src.split("/").pop();
                     if (! /^url\(/.test(wrapper.style.background)){
@@ -202,19 +203,19 @@ class fetcher{
     async ldm(){
         this.background(true);
         lightdm.cancel_autologin();
-        theme_utils.dirlist(root_dir+"/themes", false, themes=>{themes.forEach(theme=>{
-            console.log("Detected theme " + theme)
-            theme_utils.dirlist(theme,false,files=>{
-                if (files.includes(theme+"/theme.js") && files.includes(theme+"/theme.css")){
-                    let tmp = theme.split("/");
-                    thms.push(tmp.pop());
-                }
-            })
-        })})
-        while (thms.length != 0){
-            await sleep(1);
+        while (thms.length == 0){
+            thms=[];
+            theme_utils.dirlist(root_dir+"/themes", false, themes=>{themes.forEach(theme=>{
+                theme_utils.dirlist(theme,false,files=>{
+                    if (files.includes(theme+"/theme.js") && files.includes(theme+"/theme.css")){
+                        console.log("Detected theme " + theme)
+                        let tmp = theme.split("/");
+                        thms.push(tmp.pop());
+                    }
+                })
+            })})
+            await sleep(10);
         }
-        await sleep(20);
     }
     check(list, param, target){
         if (target == null){

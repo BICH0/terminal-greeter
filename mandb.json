@@ -1,0 +1,53 @@
+{
+    "lang":{
+        "es":{
+            "inv_arg":"Argumento invalido",
+            "inv_perm":"Permiso denegado",
+            "cmd_dis":"El comando ha sido deshabilitado por el administrador del sistema",
+            "unk_cmd":"comando desconocido: ",
+            "unk_pass":"Contraseña incorrecta",
+            "inv_usr":"Usuario icorrecto",
+            "inv_ssn":"Sesion incorrecta",
+            "curr_usr":" es el usuario actual",
+            "curr_ssn":" es la sesion actual",
+            "avl_usr":"Usuarios disponibles:",
+            "avl_ssn":"Sesiones disponibles:",
+            "btn_save":"Guardar",
+            "btn_reset":"Resetear",
+            "btn_browse":"Fondos de pantalla",
+            "timer":" en : segundos:Si:No",
+            "shutdown":"Apagando:Quieres apagar el equipo?",
+            "suspend":"Suspendiendo:Quieres suspender el equipo?",
+            "restart":"Reiniciando:Quieres reiniciar el equipo?",
+            "hibernate":"Hibernando:Quieres hibernar el equipo?",
+            "cannot_power":"Este sistema no puede ejecutar el comando "
+    
+        },
+        "en":{
+            "inv_arg":"Invalid argument",
+            "inv_perm":"Permision denied",
+            "cmd_dis":"The command has been disabled by the Sistem Administrator",
+            "unk_cmd":"command not found: ",
+            "unk_pass":"Invalid password",
+            "inv_usr":"Invalid user",
+            "inv_ssn":"Invalid session",
+            "curr_usr":" is the current user",
+            "curr_ssn":" is the current session",
+            "avl_usr":"Available users:",
+            "avl_ssn":"Available sessions:",
+            "btn_save":"Save",
+            "btn_reset":"Reset",
+            "btn_browse":"Wallpapers",
+            "timer":" in : seconds:Yes:No",
+            "shutdown":"Shutting down:Do you want to power off the computer?",
+            "suspend":"Suspending:Do you want to suspend the computer?",
+            "restart":"Rebooting:Do you want to reboot the computer?",
+            "hibernate":"Hibernating:Do you want to hibernate the computer?",
+            "cannot_power":"This system is not capable of "
+        }
+    },
+    "man":{
+        "es":{},
+        "en":{}
+    }
+}
