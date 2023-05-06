@@ -11,7 +11,7 @@ class menuobj{
             })
         })
         if (typeof lightdm !== "undefined"){
-            if (lightdm.can_access_battery){
+            if (lightdm.can_access_battery && lightdm.battery_data != null){
                 this.battery();
                 lightdm.battery_update.connect(() => this.battery());
             }
@@ -36,8 +36,6 @@ class menuobj{
             let index = Array.prototype.indexOf.call(item.parentNode.childNodes, item);
             let parent = item.parentNode.childNodes;
             let info = item.dataset.function.split("-");
-            console.log("SetItem " + info[0] + " to " + info[1])
-            storage.setItem(info[0]+"s",info[1])
             defaults[info[0]+"s"] = info[1];
             for (let x=0; x<parent.length; x++){
                 if (x==index){
@@ -59,7 +57,7 @@ class menuobj{
     settings(item){
         if (! item.classList.contains("hover")){
             item.classList.add("hover");
-            var configopen = function (e){//Revisar si se puede con let
+            let configopen = function (e){
                 if (e.target != thm_container && !thm_container.contains(e.target)){//Container ?= document.getElementById
                     document.removeEventListener("click", configopen, true)
                     item.classList.remove("hover");
@@ -103,6 +101,9 @@ class menuobj{
             container.style.visibility = state;
         })
         this.hidden = !this.hidden;
+    }
+    async brightness(){
+        console.log("Handling brightness");
     }
     async power(opt){
         if (lightdm["can_"+opt] === false || lightdm["can_"+opt] === undefined){

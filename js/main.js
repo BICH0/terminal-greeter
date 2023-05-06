@@ -1,9 +1,16 @@
-var lngs = ["es", "en"];
-// var pwrs = ["PowerOff", "Sleep", "Hibernate", "Reboot"];
-const prompt_vals = ["@",":~$"];
-var root_dir = "/usr/share/web-greeter/themes/terminal-greeter";
+var lngs = ["es", "en"];//You can add languages modifying mandb.json and adding the lang code here
+const prompt_vals = ["@",":~$"]; //Change it as you want the format is the following user<firs_value>session<second_value>
+var root_dir = "/usr/share/web-greeter/themes/terminal-greeter"; //Dont modify this unless you know what you are doing
 var default_timer=5;//Time in seconds to wait during shutdown/suspend...
-//---------------------------------------
+//Until JezerM/web-greeter solves the issue with localStorage to make permanent changes you will need to edit the following variable
+//Available values:
+//Lngs: es,en
+//Thms: single,neon
+//Ssns: It depends on your system, you can see all the available options in the bottom center container
+//Usrs: Same as Ssns, check the bottom left container to see the options
+var defaults = {"lngs":"es","thms":"neon","ssns":"","usrs":""};
+
+//DONT MODIFY BELOW THIS---------------------------------------
 var thms = [];var ssns = [];var usrs = [];var ascii = [];
 const prompt = document.getElementById("prompt");
 const stdout = document.getElementById("stdout");
@@ -17,12 +24,11 @@ const thm_container = document.getElementById("thm-container");
 const wrapper = document.getElementById("wrapper");
 const workspace = document.getElementById("workspace");
 const notification = document.getElementById("notification");
-const storage = window.localStorage;
+var storage = window.localStorage;
 var iprompt;var theme;
 let oneway = true;
 const history = [];
 var position = 0;
-var defaults = {"lngs":"","thms":"","ssns":"","usrs":""};
 var settings = {"ascii":"","menu":"visible"};
 var menu;
 const fetch = new fetcher;
@@ -32,22 +38,24 @@ function sleep(ms) {
 }
 
 function openstorage(){
-  for (let item in defaults){
-    let stored_item;
-    stored_item = storage.getItem(item);
-    if ( stored_item == null || stored_item == ""){
-      console.warn("Defaulting to " + '[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]')
-      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+window[item][0]+'"]'),0)
-    }
-    else{
-      console.log("Stored setting " + defaults[item] + ": " + stored_item);
-      defaults[item] = stored_item;
-      menu.select(document.querySelector('[data-function="'+item.slice(0,-1)+"-"+stored_item+'"]'),window[item].indexOf(defaults[item]))
-    }
+  let stdef = storage.getItem("defaults");
+  if (stdef == null || stdef == ""){
+    stdef="lngs:,thms:,ssns:,usrs:";
   }
-  for (let item in settings){
-    if (storage.getItem(item) != null){
-      settings[item] = storage.getItem(item);
+  console.log("Loaded settings:")
+  stdef = stdef.split(",");
+  for (let x=0;x<stdef.length;x++){
+    let def = stdef[x].split(":");
+    if (defaults[def[0]] == ""){
+      defaults[def[0]]=def[1];
+      console.log("  - "+ def[0] + ": |" +def[1]+"|");
+    }else{
+      def[1]=defaults[def[0]];
+    }
+    if (def[1] == ""){
+      menu.select(document.querySelector('[data-function="'+def[0].slice(0,-1)+"-"+window[def[0]][0]+'"]'),0);
+    }else{
+      menu.select(document.querySelector('[data-function="'+def[0].slice(0,-1)+"-"+def[1]+'"]'),window[def[0]].indexOf(defaults[def[0]]));
     }
   }
 }
@@ -56,7 +64,6 @@ function generate_prompt(std0=""){
   nodes[0].innerText = defaults["usrs"];
   nodes[2].innerText = defaults["ssns"];
   iprompt="<span class='text-accent'>" + defaults["usrs"] + "</span><span class='text-accent2'>" + prompt_vals[0] + "</span><span class='text-accent'>" + defaults["ssns"] + "</span><span class='text-accent2' style='margin-right:3px;'>" + prompt_vals[1] + "</span>";
-  // stdout.innerHTML += "<p>" + std0 + "</p>";
 }
 async function preload(){
   if( typeof lightdm === "undefined"){
@@ -112,13 +119,18 @@ async function preload(){
   usrs = lightdm.users.map(({username}) => username);
   ssns = lightdm.sessions.map(({key}) => key);
   menu = new menuobj;
-  if (lightdm.can_access_brightness){
-    document.getElementById("pwr_container").addEventListener("wheel", e =>{
-        if (e.wheelDelta > 0 && lightdm.brightness <= 98){
-            lightdm.brightness_increase(2);
-        }else if(e.wheelDelta > 0 && lightdm.brightness >= 2){
-            lightdm.brightness_decrease(2);
-        }
+  if (lightdm.can_access_brightness && lightdm.brightness != "-Infinity"){
+    pwr_container.addEventListener("wheel", async e =>{
+      let value = lightdm.brightness;
+      pwr_container.style.background = "linear-gradient(0deg, var(--accent) "+ (value)+ "%, var(--container-bg) " + (value) + "%)"
+      console.log(pwr_container.style.background)
+      if (e.wheelDelta > 0 && value <= 98){
+          lightdm.brightness_increase(2);
+      }else if(e.wheelDelta > 0 && value >= 2){
+          lightdm.brightness_decrease(2);
+      }
+      await sleep(300);
+      pwr_container.style.background = "var(--container-bg)";
     });
   }
   await openstorage();
@@ -134,7 +146,6 @@ async function preload(){
   }
   await fetch.theme();
   ascii = await fetch.ascii;
-  // lang_content = await fetch.lang_selector();
 }
 async function load(){
   try{
@@ -144,6 +155,7 @@ async function load(){
     theme.start();
   }
   storage.setItem("multiwin",(new Date).getMilliseconds());
+  stdin.focus();
 }
 function stick_bottom(){
   term.scrollTo(0, term.scrollHeight);

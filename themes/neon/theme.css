@@ -1,6 +1,5 @@
 :root{
-    --pene: #0f0f0f;
-    --neon: #FF0000;
+    --neon: #00ffd5;
 }
 #terminal{
     position: relative;

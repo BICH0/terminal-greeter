@@ -4,7 +4,6 @@
   --shadow: #00000094;
   --terminal-bg: #1f1f1ff6;
   --term-shadow: #0000009f;
-  /* --border: ; */
   --accent: #ca0000;
   --text: #ffffff;
   --text-accent: #ff0000;
@@ -232,6 +231,14 @@ html,body,#wrapper{
   border-radius: .2rem;
   border: 2px solid var(--text);
   filter: brightness(.5);
+}
+.hidecolors > #colors-btn > input:nth-of-type(3){
+  display: none;
+}
+.hidecolors > #colors-btn > input{
+  width: 70%;
+  left: -20px;
+  position: relative;
 }
 .hidecolors > *{
   opacity: 0;

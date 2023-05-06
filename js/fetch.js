@@ -6,7 +6,9 @@ fetch("mandb.json").then(response => response.json()).then(json => JSON.stringif
 class fetcher{
     constructor(){
         this.in_authentication = false;
-        this.colors_array = [];
+        this.stored_dict = {};
+        this.theme_dict = {};
+        this.custom_dict = {};
         this.login_tries = 0;
     }
     ascii(name){
@@ -50,6 +52,9 @@ class fetcher{
         return asc.replaceAll("¬","\u00a0").split("½");
     }
     async theme(thm=defaults["thms"]){
+        cover.style.opacity = "1";
+        await sleep(300);
+        cover.style.display = "block";
         let nodes = document.head.querySelectorAll("[href*='themes'],[src*='themes']");
         if (nodes.length != 0){
             theme.loadsession(false);
@@ -57,6 +62,7 @@ class fetcher{
                 node.remove();
             })
         }
+        storage.setItem("multiwin","a");
         let script = document.createElement("script");
         script.src = "./themes/" + thm + "/theme.js";
         script.type = "text/javascript";
@@ -67,14 +73,20 @@ class fetcher{
         stylesheet.href = "./themes/" + thm + "/theme.css";
         script.onload = () => console.log("Stylesheet loaded");
         document.head.appendChild(script);
-        document.head.appendChild(stylesheet); 
-        await sleep(100);
-        theme = new classTheme;
-        await sleep(100);
+        document.head.appendChild(stylesheet);
+        while (typeof(theme) != "object"){
+            try{
+                theme = new classTheme;
+            }catch{
+                await sleep(100);
+            }
+        }
+        await this.byebye();
         this.background("init");
         this.colors("setup");
+        await sleep(100);
         load();
-      };
+    };
     lang_selector(value=defaults["lngs"]){
             defaults["lngs"] = value;
             this.colors("");
@@ -82,15 +94,26 @@ class fetcher{
     background(mode=null,item){
         switch (mode){
             case null:
-                wrapper.style.background = "url('" + item.getAttribute("src") + "') no-repeat center/cover";
-                item = item.src.split("/").pop();
+                let path;
+                try{
+                    path=item.src.split("/").pop();
+                }
+                catch{
+                    path="placeholder.png"
+                }
+                if (path == "placeholder.png"){
+                    wrapper.style.background = "var(--background)";
+                }else{
+                    wrapper.style.background = "url('" + item.getAttribute("src") + "') no-repeat center/cover";
+                }
                 let items = document.getElementsByClassName("bg-selected");
                 if (items[0] != undefined){
                     items[0].classList.remove("bg-selected");
                 }
-                bg_container.querySelectorAll("img[data-name='" + item + "']")[0].classList.add("bg-selected");
+                bg_container.querySelectorAll("img[data-name='" + path + "']")[0].classList.add("bg-selected");
                 break;
             case "setup":
+                bg_container.innerHTML += "<img src='"+root_dir+"/resources/placeholder.png' class='bg-selected' onclick='fetch.background(null,this)'data-name='placeholder.png'>";
                 theme_utils.dirlist(root_dir+"/resources/backgrounds",true,files=>{
                     files.forEach(file => {
                         let filename = file.split("/").pop();
@@ -99,22 +122,33 @@ class fetcher{
                 })
                 break;
             case "init":
-                let tback = storage.getItem(defaults["thms"].slice(0,2)+"-bg");
-                if ((!/var\(/.test(tback)) && item != "reset"){
+                let tback = this.stored_dict["background-img"];
+                if ((!/var\(/.test(tback)) && item != "reset" && tback != null){
                     let tobj = document.querySelectorAll("img[data-name='" + tback + "']")[0];
                     if ( tobj != null){
                         this.background(null,tobj);
                     }
                 }else{
                     if (/^url\(/.test(wrapper.style.background)){
-                        wrapper.style.background = "var(--background)";
+                        this.background(null,)
                     }
                 }
                 break;
         }
     }
-    async colors(action="update",update=false,store=false){
+    async colors(action="update"){
         var colorsContainer = document.getElementsByClassName("colors")[0];
+        async function colors_updater(param=null,value=null){
+            fetch.stored_dict[param] = value;
+            let array=Object.keys(fetch.stored_dict);
+            let result="";
+            for (let x=0; x<array.length;x++){
+                result=result+array[x]+":"+fetch.stored_dict[array[x]]+","
+            }
+            storage.removeItem(defaults["thms"].slice(0,2));
+            await sleep(200);
+            storage.setItem(defaults["thms"].slice(0,2),result.slice(0,-1));
+        }
         switch (action){
             case "update":
                 colorsContainer = colorsContainer.childNodes;
@@ -123,7 +157,7 @@ class fetcher{
                     let colorvalue = colorsContainer[x].childNodes[1].value;
                     let coloropacity = parseInt(colorsContainer[x].childNodes[2].value).toString(16);
                     document.documentElement.style.setProperty("--"+colorname, colorvalue + coloropacity);
-                    this.colors_array["--" + colorname] = colorvalue + coloropacity;
+                    this.custom_dict[colorname] = colorvalue + coloropacity;
                 }
             break;
             case "store":
@@ -133,25 +167,49 @@ class fetcher{
                     if (! /^url\(/.test(wrapper.style.background)){
                         bg_value = "var(--background)";
                     }
-                    storage.setItem(defaults["thms"].slice(0,2)+"-bg", bg_value)
+                    else{
+                        bg_value = bg_value;
+                    }
+                    colors_updater("background-img",bg_value);
                 }else{
                     await this.colors();
-                    for (let color in this.colors_array){
-                        storage.setItem(defaults["thms"].slice(0,2)+color, this.colors_array[color])
+                    let array = Object.keys(this.custom_dict);
+                    for (let x=0;x<array.length;x++){
+                        let key = array[x];
+                        let nvalue = this.custom_dict[key];
+                        if (nvalue.slice(-2,) == "ff" && nvalue.length == 9){
+                            nvalue=nvalue.slice(0,-2);
+                        }
+                        let regexp=new RegExp(nvalue + "(f{2})?")
+                        if (! regexp.test(this.theme_dict[key])){
+                            if (! regexp.test(this.stored_dict[key]) || this.stored_dict[key] == null){
+                                colors_updater(key,this.custom_dict[key]);
+                                continue;
+                            }
+                            continue;
+                        }
                     }
                 }
+
                 break;
             case "clean":
-                if (bg_container.classList.contains("bg-open")){
-                    this.background("init","reset");
-                }else{
-                    for (let color in this.colors_array){
-                        storage.removeItem(defaults["thms"].slice(0,2)+color);
-                    }
-                    this.colors();
-                }
+                storage.removeItem(defaults["thms"].slice(0,2));
             default:
+                this.stored_dict = {};
+                this.theme_dict = {};
                 colorsContainer.innerHTML = "<div><h4>Item</h4><h4>Color</h4><h4>Opacity</h4>";
+                try{
+                    let custom_colors = (storage.getItem(defaults["thms"].slice(0,2))).split(",");
+                    for (let x=0;x<custom_colors.length;x++){
+                        let color = custom_colors[x].split(":");
+                        console.log(" +" + color);
+                        this.stored_dict[color[0]]=color[1];
+                    }
+                    console.log("Custom colors: " + (Object.keys(this.stored_dict)).length)
+                }catch{
+                    console.log("No custom colors");
+                }
+                this.background("init");
                 let stsheet;
                 for (let x=0; x<document.styleSheets.length; x++){
                     try{
@@ -165,16 +223,14 @@ class fetcher{
                                 return;
                             }
                             rule = rule.replaceAll(" ","").split(":");
-                            let name = rule[0];
-                            let value;
-                            value = storage.getItem(defaults["thms"].slice(0,2)+name);
+                            let name = rule[0].slice(2,);
+                            let value = this.stored_dict[name];
                             if (value != null){
-                                name = name.replaceAll("--","");
                                 document.documentElement.style.setProperty(name,value)
                             }else{
-                                name = name.replaceAll("--","");
                                 value = rule[1];
                             }
+                            this.theme_dict[name]=value;
                             let opacity = 255;
                             if (! /^#[0-9a-fA-F]{3,6}$/.test(value)){ //Comprobar la regexp
                                 if (/^#[0-9a-fA-F]{8}$/.test(value)){
@@ -188,7 +244,7 @@ class fetcher{
                         })
                     }
                     catch(e){
-                        console.error("Unable to get " + stsheet + " due to " + e)
+                            console.error("Unable to get " + stsheet + " due to " + e)
                     }
                 }
                 colorsContainer.innerHTML += "<div id='colors-btn'><input type='button' id='image_selector' onclick='menu.background(this)' value='" + langs[defaults["lngs"]]["btn_browse"] + "'><input type='button' onclick='fetch.colors(\"store\")' value='" + langs[defaults["lngs"]]["btn_save"] + "'><input type='button' onclick='fetch.colors(\"clean\")' value='" + langs[defaults["lngs"]]["btn_reset"] + "'></div>";
@@ -214,7 +270,7 @@ class fetcher{
                     }
                 })
             })})
-            await sleep(10);
+            await sleep(100);
         }
     }
     check(list, param, target){
@@ -265,9 +321,9 @@ class fetcher{
             toggleprompt();
         }else{
             stdin.disabled = true;
-            await sleep(100);//TODO comprobar
-            lightdm.respond(mode);
             await sleep(100);
+            lightdm.respond(mode);
+            await this.byebye();
             if (lightdm.is_authenticated){
                 theme.loadsession();
             }else{
@@ -287,5 +343,13 @@ class fetcher{
                 }
             }
         }
+    }
+    async byebye(){
+        let temp="";
+        for (let def in defaults){
+            temp+=def+":"+defaults[def]+",";
+        }
+        storage.setItem("defaults",temp.slice(0,-1));
+        await sleep(100);
     }
 }
